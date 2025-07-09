@@ -2,10 +2,15 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="15.0.0" />
+    <PackageReference Include="CsvHelper" Version="33.1.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Pfm.Domain\Pfm.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DTOs\Responses\" />
   </ItemGroup>
 
   <PropertyGroup>

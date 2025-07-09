@@ -4,6 +4,8 @@ using Pfm.Infrastructure;
 using Microsoft.OpenApi.Models;
 using Pfm.Application;
 using Pfm.Domain.Interfaces;
+using Pfm.Api.Formatters;
+using Pfm.Api.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,13 +16,17 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddInfrastructure();
-builder.Services.AddControllers();
 builder.Services.AddApplicationServices();
+builder.Services.AddControllers(options =>
+{
+    options.InputFormatters.Insert(0, new TextPlainInputFormatter());
+    options.Filters.Add<AppExceptionFilter>();
+});
+
 
 var app = builder.Build();
 
 app.MapControllers();
-
 
 if (app.Environment.IsDevelopment())
 {

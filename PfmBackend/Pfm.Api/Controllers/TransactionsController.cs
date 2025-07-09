@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CsvHelper;
+using Microsoft.AspNetCore.Mvc;
+using Pfm.Application.Services;
 using Pfm.Domain.Entities;
 using Pfm.Domain.Interfaces;
 using System;
@@ -14,9 +16,14 @@ namespace Pfm.Api.Controllers
     public class TransactionsController : ControllerBase
     {
         private readonly ITransactionService _service;
-        public TransactionsController(ITransactionService service) => _service = service;
+        public TransactionsController(ITransactionService service)
+        { 
+            _service = service;
+        }
 
-        [HttpGet] 
+        [HttpGet]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(500)]
         // GET /api/transactions
         public async Task<IActionResult> GetTransactions()
         {
@@ -24,12 +31,17 @@ namespace Pfm.Api.Controllers
             
         }
 
-        [HttpPost("import")] 
+        [HttpPost("import")]
+        [Consumes("text/csv")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
         // POST /api/transactions/import
-        public async Task<IActionResult> ImportTransactions([FromBody] List<Transaction> transactions)
+        public async Task<IActionResult> ImportTransactions([FromBody] string csvContent)
         {
-            await _service.ImportTransactionsAsync(transactions);
-            return Ok($"{transactions.Count} transactions imported.");
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(csvContent));
+            await _service.ImportTransactionsAsync(stream);
+            return Ok();
         }
     }
 }

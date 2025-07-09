@@ -1,36 +1,92 @@
-﻿using Pfm.Domain.Entities;
+﻿using AutoMapper;
+using CsvHelper;
+using Microsoft.Extensions.Logging;
+using Pfm.Application.Common;
+using Pfm.Application.DTOs.Requests;
+using Pfm.Application.Exceptions;
+using Pfm.Application.Mappings.Transactions;
+using Pfm.Domain.Entities;
 using Pfm.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Globalization;
+using static Pfm.Domain.Interfaces.ITransactionService;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Pfm.Application.Services
 {
     public class TransactionService : ITransactionService
     {
         private readonly IUnitOfWork _uow;
-        public TransactionService(IUnitOfWork uow) => _uow = uow;
+        private readonly IMapper _mapper;
+        private readonly ILogger<TransactionService> _logger;
 
-
-        public async Task<List<Transaction>> GetTransactionsAsync() =>
-            (await _uow.Transactions.GetAllAsync()).ToList();
-
-        public Task ImportTransactionsAsync(List<Transaction> transactions)
+        public TransactionService(IUnitOfWork uow, IMapper mapper, ILogger<TransactionService> logger)
         {
-            throw new NotImplementedException();
-        }
-        public Task CategorizeTransactionAsync(string id, string catCode)
-        {
-            throw new NotImplementedException();
+            _uow = uow;
+            _mapper = mapper;
+            _logger = logger;
         }
 
-        public Task SplitTransactionAsync(string id, List<Split> splits)
+        public async Task<List<Transaction>> GetTransactionsAsync()
         {
-            throw new NotImplementedException();
+            return (await _uow.Transactions.GetAllAsync()).ToList();
         }
 
-        
+        public async Task ImportTransactionsAsync(Stream csvStream)
+        {
+            var errors = new List<AppError>();
+            var transactions = new List<Transaction>();
+
+            await MapTransactionsCsv(csvStream, errors, transactions);
+
+            if (errors.Any())
+            {
+                throw new AppException(errors, "Mapping failed");
+            }
+
+            if (!transactions.Any())
+            {
+                return;
+            }
+
+            //Implement validation!!!
+
+            await _uow.Transactions.AddRangeAsync(transactions);
+            await _uow.CompleteAsync();
+        }
+
+        private async Task MapTransactionsCsv(Stream csvStream, List<AppError> errors, List<Transaction> transactions)
+        {
+            StreamReader reader = new StreamReader(csvStream);
+            CsvReader csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+            csv.Context.RegisterClassMap<TransactionCsvMap>();
+
+            try
+            {
+                await foreach (var record in csv.GetRecordsAsync<TransactionCsvRequest>())
+                {
+                    try
+                    {
+                        var transaction = _mapper.Map<Transaction>(record);
+                        transactions.Add(transaction);
+                    }
+                    catch (Exception ex)
+                    {
+                        errors.Add(new AppError(
+                            Tag: "record-" + record.Id,
+                            Error: "invalid-csv-format",
+                            Message: ex.Message
+                        ));
+                    }
+                }
+            }
+            catch (CsvHelperException ex)
+            {
+                errors.Add(new AppError(
+                    Tag: "csv-exception",
+                    Error: "invalid-csv",
+                    Message: ex.Message
+                ));
+            }
+        }
     }
 }
