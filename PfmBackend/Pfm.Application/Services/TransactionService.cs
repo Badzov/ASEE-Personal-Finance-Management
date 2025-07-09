@@ -17,7 +17,7 @@ namespace Pfm.Application.Services
         public async Task<List<Transaction>> GetTransactionsAsync() =>
             (await _repo.GetAllAsync()).ToList();
 
-        public async Task ImportTransactionsAsync(List<Transaction> transactions)
+        public Task ImportTransactionsAsync(List<Transaction> transactions)
         {
             throw new NotImplementedException();
         }

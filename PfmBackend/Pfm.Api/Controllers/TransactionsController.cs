@@ -10,20 +10,22 @@ using System.Threading.Tasks;
 namespace Pfm.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/transactions")]
     public class TransactionsController : ControllerBase
     {
         private readonly ITransactionService _service;
         public TransactionsController(ITransactionService service) => _service = service;
 
-        [HttpGet]
+        [HttpGet] 
+        // GET /api/transactions
         public async Task<IActionResult> GetTransactions()
         {
             return Ok(await _service.GetTransactionsAsync());
             
         }
 
-        [HttpPost("import")]
+        [HttpPost("import")] 
+        // POST /api/transactions/import
         public async Task<IActionResult> ImportTransactions([FromBody] List<Transaction> transactions)
         {
             await _service.ImportTransactionsAsync(transactions);

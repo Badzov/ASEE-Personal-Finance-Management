@@ -5,19 +5,18 @@ using Pfm.Domain.Entities;
 using Pfm.Domain.Interfaces;
 using Pfm.Infrastructure.Data;
 using Pfm.Infrastructure.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Pfm.Infrastructure
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
-            services.AddDbContext<PfmDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("PfmDatabase")));
+            IConfiguration configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            services.AddDbContext<PfmDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("MSSQLPfmDatabase")));
             services.AddScoped<IRepository<Transaction>, TransactionRepository>();
 
             return services;

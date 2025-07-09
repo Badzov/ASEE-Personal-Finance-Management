@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace Pfm.Infrastructure.Data
 {
@@ -12,8 +13,12 @@ namespace Pfm.Infrastructure.Data
     {
         public PfmDbContext CreateDbContext(string[] args)
         {
+            IConfiguration configuration = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json")
+            .Build();
+
             var optionsBuilder = new DbContextOptionsBuilder<PfmDbContext>();
-            optionsBuilder.UseSqlServer("Server=localhost;Database=pfm;Trusted_Connection=True;TrustServerCertificate=True;");
+            optionsBuilder.UseSqlServer(configuration.GetConnectionString("MSSQLPfmDatabase"));
 
             return new PfmDbContext(optionsBuilder.Options);
         }

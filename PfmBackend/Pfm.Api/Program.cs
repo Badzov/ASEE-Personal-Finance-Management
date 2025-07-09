@@ -2,6 +2,8 @@ using Pfm.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Pfm.Infrastructure;
 using Microsoft.OpenApi.Models;
+using Pfm.Application;
+using Pfm.Domain.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,14 +13,15 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "PFM API", Version = "v1" });
 });
 
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructure();
 builder.Services.AddControllers();
+builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 
 app.MapControllers();
 
-// Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
