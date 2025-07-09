@@ -1,0 +1,70 @@
+# Build Folders
+bin/
+obj/
+
+# Visual Studio / Rider files
+.vs/
+*.user
+*.suo
+*.userprefs
+*.ide.*
+*.sln.docstates
+
+# Rider
+.idea/
+
+# DotCover
+*.dotCover
+
+# Resharper
+_ReSharper*/
+*.DotSettings.user
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Azure Pipelines
+*.publish.xml
+
+# User secrets (if used)
+secrets.json
+*.usersecrets
+
+# Publish Output
+publish/
+
+# Environment variables
+.env
+.env.*
+
+# YAML files (exclude if you generate configs or secrets, otherwise keep)
+# *.yaml
+# *.yml
+
+# Test result files
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# Backup files
+*.bak
+*.old
+*.backup
+
+# Others
+*.vsix
