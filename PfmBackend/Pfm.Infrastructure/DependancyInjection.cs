@@ -17,7 +17,8 @@ namespace Pfm.Infrastructure
                 .Build();
 
             services.AddDbContext<PfmDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("MSSQLPfmDatabase")));
-            services.AddScoped<IRepository<Transaction>, TransactionRepository>();
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;
         }

@@ -10,12 +10,12 @@ namespace Pfm.Application.Services
 {
     public class TransactionService : ITransactionService
     {
-        private readonly IRepository<Transaction> _repo;
-        public TransactionService(IRepository<Transaction> repo) => _repo = repo;
+        private readonly IUnitOfWork _uow;
+        public TransactionService(IUnitOfWork uow) => _uow = uow;
 
 
         public async Task<List<Transaction>> GetTransactionsAsync() =>
-            (await _repo.GetAllAsync()).ToList();
+            (await _uow.Transactions.GetAllAsync()).ToList();
 
         public Task ImportTransactionsAsync(List<Transaction> transactions)
         {
