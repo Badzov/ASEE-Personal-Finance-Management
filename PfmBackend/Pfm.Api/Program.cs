@@ -1,9 +1,6 @@
-using Pfm.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 using Pfm.Infrastructure;
 using Microsoft.OpenApi.Models;
 using Pfm.Application;
-using Pfm.Domain.Interfaces;
 using Pfm.Api.Formatters;
 using Pfm.Api.Filters;
 
@@ -16,13 +13,15 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddInfrastructure();
-builder.Services.AddApplicationServices();
+builder.Services.AddApplicationServices(); 
+
 builder.Services.AddControllers(options =>
 {
     options.InputFormatters.Insert(0, new TextPlainInputFormatter());
     options.Filters.Add<AppExceptionFilter>();
+    options.Filters.Add<DomainExceptionFilter>();
+    options.Filters.Add<DatabaseExceptionFilter>();
 });
-
 
 var app = builder.Build();
 

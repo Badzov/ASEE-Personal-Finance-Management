@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pfm.Application.DTOs.Requests
+namespace Pfm.Application.UseCases.Transactions.Queries.GetTransactions
 {
-    public class TransactionCsvRequest
+    public class GetTransactionsDto
     {
         public string Id { get; set; }
         public string BeneficiaryName { get; set; }
@@ -15,7 +15,8 @@ namespace Pfm.Application.DTOs.Requests
         public decimal Amount { get; set; }
         public string Description { get; set; }
         public string Currency { get; set; }
-        public int? Mcc { get; set; }
+        public string Mcc { get; set; }
         public string Kind { get; set; }
+        public string CategoryCode { get; set; }
     }
 }

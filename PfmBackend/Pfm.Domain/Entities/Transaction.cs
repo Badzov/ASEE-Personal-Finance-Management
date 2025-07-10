@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Pfm.Domain.Enums;
+using Pfm.Domain.Exceptions;
 
 namespace Pfm.Domain.Entities
 {
@@ -46,6 +42,18 @@ namespace Pfm.Domain.Entities
         public virtual Category Category { get; set; }
 
         public virtual ICollection<Split> Splits { get; set; }
+
+
+        public void Validate()
+        {
+            if (Amount <= 0)
+            {
+                throw new DomainException("invalid-amount", "Transaction amount must be positive");
+            }
+
+            if (Mcc.HasValue && !Enum.IsDefined(typeof(MccCode), Mcc.Value))
+                throw new DomainException("invalid-mcc", $"Invalid MCC code: {Mcc.Value}");
+        }
     }
 
 }

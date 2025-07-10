@@ -1,20 +1,12 @@
-﻿using AutoMapper;
-using CsvHelper.Configuration;
+﻿using CsvHelper.Configuration;
 using CsvHelper.TypeConversion;
 using CsvHelper;
-using Pfm.Domain.Entities;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using Pfm.Application.DTOs.Requests;
+using Pfm.Application.UseCases.Transactions.Commands.ImportTransactions;
 
-namespace Pfm.Application.Mappings.Transactions
+namespace Pfm.Application.UseCases.Transactions.Mappings
 {
-    public sealed class TransactionCsvMap : ClassMap<TransactionCsvRequest>
+    public sealed class TransactionCsvMap : ClassMap<ImportTransactionsDto>
     {
         public TransactionCsvMap()
         {

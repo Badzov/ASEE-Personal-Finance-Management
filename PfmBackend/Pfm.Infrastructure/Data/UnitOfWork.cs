@@ -1,5 +1,7 @@
-﻿using Pfm.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using Pfm.Domain.Entities;
 using Pfm.Domain.Interfaces;
+using Pfm.Infrastructure.Exceptions;
 using Pfm.Infrastructure.Repositories;
 using System;
 using System.Collections.Generic;
@@ -25,7 +27,21 @@ namespace Pfm.Infrastructure.Data
             Splits = new Repository<Split>(_context);
         }
 
-        public async Task<int> CompleteAsync() => await _context.SaveChangesAsync();
+        public async Task<int> CompleteAsync()
+        {
+            try
+            {
+                return await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw new ConcurrentUpdateException();
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new DatabaseOperationException("save", ex.InnerException?.Message ?? ex.Message);
+            }
+        }
 
         public void Dispose() => _context.Dispose();
     }

@@ -1,13 +1,8 @@
-﻿using CsvHelper;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Pfm.Application.Services;
-using Pfm.Domain.Entities;
-using Pfm.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Pfm.Application.UseCases.Transactions.Commands.ImportTransactions;
+using Pfm.Application.UseCases.Transactions.Queries.GetTransactions;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Pfm.Api.Controllers
 {
@@ -15,20 +10,20 @@ namespace Pfm.Api.Controllers
     [Route("api/transactions")]
     public class TransactionsController : ControllerBase
     {
-        private readonly ITransactionService _service;
-        public TransactionsController(ITransactionService service)
-        { 
-            _service = service;
+        private readonly IMediator _mediator;
+
+        public TransactionsController(IMediator mediator)
+        {
+            _mediator = mediator;
         }
 
         [HttpGet]
         [ProducesResponseType(200)]
         [ProducesResponseType(500)]
-        // GET /api/transactions
         public async Task<IActionResult> GetTransactions()
         {
-            return Ok(await _service.GetTransactionsAsync());
-            
+            var result = await _mediator.Send(new GetTransactionsQuery());
+            return Ok(result);
         }
 
         [HttpPost("import")]
@@ -36,12 +31,12 @@ namespace Pfm.Api.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        // POST /api/transactions/import
         public async Task<IActionResult> ImportTransactions([FromBody] string csvContent)
         {
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(csvContent));
-            await _service.ImportTransactionsAsync(stream);
+            await _mediator.Send(new ImportTransactionsCommand(stream));
             return Ok();
         }
     }
 }
+

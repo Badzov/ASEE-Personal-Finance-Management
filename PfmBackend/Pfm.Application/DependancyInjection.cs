@@ -1,14 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Pfm.Application.Services;
-using Pfm.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using Pfm.Application.Mappings.Transactions;
+using Pfm.Application.UseCases.Transactions.Mappings;
 
 namespace Pfm.Application
 {
@@ -16,12 +8,13 @@ namespace Pfm.Application
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
-            services.AddAutoMapper(cfg =>
+            services.AddAutoMapper(config =>
             {
-                cfg.AddProfile<TransactionProfile>();
+                config.AddProfile<TransactionProfile>();
             });
 
-            services.AddScoped<ITransactionService, TransactionService>();
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependancyInjection).Assembly));
+
             return services;
         }
     }
