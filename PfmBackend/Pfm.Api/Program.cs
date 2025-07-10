@@ -3,6 +3,7 @@ using Microsoft.OpenApi.Models;
 using Pfm.Application;
 using Pfm.Api.Formatters;
 using Pfm.Api.Filters;
+using Pfm.Api.Filters.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "PFM API", Version = "v1" });
+    c.OperationFilter<ErrorExamplesFilter>();
 });
 
 builder.Services.AddInfrastructure();
