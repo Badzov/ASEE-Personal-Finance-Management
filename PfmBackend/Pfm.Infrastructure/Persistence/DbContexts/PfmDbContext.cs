@@ -7,7 +7,7 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pfm.Infrastructure.Data
+namespace Pfm.Infrastructure.Persistence.DbContexts
 {
     public class PfmDbContext : DbContext
     {

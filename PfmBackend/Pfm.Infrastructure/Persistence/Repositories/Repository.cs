@@ -1,5 +1,4 @@
 ﻿using Pfm.Domain.Interfaces;
-using Pfm.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,12 +8,13 @@ using Pfm.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Pfm.Infrastructure.Exceptions;
 using System.Data.SqlClient;
+using Pfm.Infrastructure.Persistence.DbContexts;
 
-namespace Pfm.Infrastructure.Repositories
+namespace Pfm.Infrastructure.Persistence.Repositories
 {
     public class Repository<T> : IRepository<T> where T : class
     {
-        private readonly PfmDbContext _context;
+        internal readonly PfmDbContext _context;
         private readonly string _entityName = typeof(T).Name;
 
         public Repository(PfmDbContext context)
@@ -77,7 +77,7 @@ namespace Pfm.Infrastructure.Repositories
 
         private static bool IsConcurrencyConflict(DbUpdateException ex)
         {
-            return ex.InnerException is SqlException sqlEx && (sqlEx.Number == 2627 || sqlEx.Number == 2601); 
+            return ex.InnerException is SqlException sqlEx && (sqlEx.Number == 2627 || sqlEx.Number == 2601);
         }
     }
 }

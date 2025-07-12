@@ -8,20 +8,20 @@ namespace Pfm.Domain.Enums
 {
     public enum TransactionKind
     {
-        Dep,
-        Wdw,
-        Pmt,
-        Fee,
-        Inc,
-        Rev,
-        Adj,
-        Lnd,
-        Lnr,
-        Fcx,
-        Aop,
-        Acl,
-        Spl,
-        Sal
+        dep,        // Deposit  
+        wdw,        // Withdrawal  
+        pmt,        // Payment  
+        fee,        // Fee  
+        inc,        // Interest  
+        rev,        // Reversal  
+        adj,        // Adjustment  
+        lnd,        // LoanDisbursement  
+        lnr,        // LoanRepayment  
+        fcx,        // ForeignExchange  
+        aop,        // AccountOpening  
+        acl,        // AccountClosing  
+        spl,        // SplitPayment  
+        sal         // Salary  
     }
 
 }

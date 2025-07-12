@@ -10,14 +10,14 @@ namespace Pfm.Application.UseCases.Transactions.Mappings
     {
         public TransactionProfile()
         {
-            CreateMap<Transaction, GetTransactionsDto>()
+            CreateMap<Transaction, TransactionDto>()
                 .ForMember(dest => dest.Direction,
-                    opt => opt.MapFrom(src => src.Direction.ToString()))
+                    opt => opt.MapFrom(src => src.Direction.ToString().ToLower())) 
                 .ForMember(dest => dest.Kind,
-                    opt => opt.MapFrom(src => src.Kind.ToString()))
+                    opt => opt.MapFrom(src => src.Kind.ToString().ToLower())) 
                 .ForMember(dest => dest.Mcc,
                     opt => opt.MapFrom(src => src.Mcc.HasValue ? src.Mcc.Value.ToString() : null))
-                .ForMember(dest => dest.CategoryCode,
+                .ForMember(dest => dest.CatCode, 
                     opt => opt.MapFrom(src => src.CatCode));
 
             CreateMap<ImportTransactionsDto, Transaction>()

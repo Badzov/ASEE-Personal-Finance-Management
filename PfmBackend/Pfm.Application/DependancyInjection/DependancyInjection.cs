@@ -2,7 +2,7 @@
 using System.Reflection;
 using Pfm.Application.UseCases.Transactions.Mappings;
 
-namespace Pfm.Application
+namespace Pfm.Application.DependancyInjection
 {
     public static class DependancyInjection
     {

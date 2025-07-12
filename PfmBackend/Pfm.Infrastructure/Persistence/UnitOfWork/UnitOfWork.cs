@@ -2,27 +2,22 @@
 using Pfm.Domain.Entities;
 using Pfm.Domain.Interfaces;
 using Pfm.Infrastructure.Exceptions;
-using Pfm.Infrastructure.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Pfm.Infrastructure.Persistence.DbContexts;
+using Pfm.Infrastructure.Persistence.Repositories;
 
-namespace Pfm.Infrastructure.Data
+namespace Pfm.Infrastructure.Persistence.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork
     {
         private readonly PfmDbContext _context;
-
-        public IRepository<Transaction> Transactions { get; }
+        public ITransactionRepository Transactions { get; }
         public IRepository<Category> Categories { get; }
         public IRepository<Split> Splits { get; }
 
         public UnitOfWork(PfmDbContext context)
         {
             _context = context;
-            Transactions = new Repository<Transaction>(_context);
+            Transactions = new TransactionRepository(_context);
             Categories = new Repository<Category>(_context);
             Splits = new Repository<Split>(_context);
         }

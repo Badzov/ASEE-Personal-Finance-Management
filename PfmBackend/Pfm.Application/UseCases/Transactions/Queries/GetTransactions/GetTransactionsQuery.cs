@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Pfm.Application.Common;
+using Pfm.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +9,5 @@ using System.Threading.Tasks;
 
 namespace Pfm.Application.UseCases.Transactions.Queries.GetTransactions
 {
-    public class GetTransactionsQuery : IRequest<List<GetTransactionsDto>>
-    {
-
-    }
+    public record GetTransactionsQuery(TransactionFilters Filters): IRequest<PaginatedResult<TransactionDto>>;
 }

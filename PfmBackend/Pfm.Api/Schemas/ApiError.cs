@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pfm.Application.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +13,5 @@ namespace Pfm.Api.Schemas
     string error,
     string message);
 
-    public record ApiErrorResponse(
-
-    List<ApiError> errors);
+    public record ApiErrorResponse(IEnumerable<AppError> Errors);
 }

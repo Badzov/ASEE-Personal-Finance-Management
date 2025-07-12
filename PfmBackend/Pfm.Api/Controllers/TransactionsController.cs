@@ -1,8 +1,13 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Pfm.Api.Schemas;
+using Pfm.Application.Common;
 using Pfm.Application.UseCases.Transactions.Commands.ImportTransactions;
 using Pfm.Application.UseCases.Transactions.Queries.GetTransactions;
+using Pfm.Domain.Entities;
+using Pfm.Domain.Enums;
+using System.Drawing;
+using System.Security.Policy;
 using System.Text;
 
 namespace Pfm.Api.Controllers
@@ -19,12 +24,35 @@ namespace Pfm.Api.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(List<GetTransactionsDto>), 200)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetTransactions()
+        [ProducesResponseType(typeof(PaginatedResult<TransactionDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status422UnprocessableEntity)]
+        public async Task<IActionResult> GetTransactions(
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery(Name = "kinds")] List<string>? kindStrings,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
         {
-            var result = await _mediator.Send(new GetTransactionsQuery());
-            return Ok(result);
+            try
+            {
+                var filters = TransactionFilters.Create(
+                    startDate,
+                    endDate,
+                    kindStrings,
+                    page,
+                    pageSize
+                );
+
+                var result = await _mediator.Send(new GetTransactionsQuery(filters));
+                return Ok(result);
+            }
+            catch (ArgumentException ex) when (ex.Message.Contains("is not a valid value"))
+            {
+                return UnprocessableEntity(new ApiErrorResponse(
+                    new[] { new AppError("kinds", "invalid-kind", "Invalid transaction kind value") }
+                ));
+            }
         }
 
         [HttpPost("import")]

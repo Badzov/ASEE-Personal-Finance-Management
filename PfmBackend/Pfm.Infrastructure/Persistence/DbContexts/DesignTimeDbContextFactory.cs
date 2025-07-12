@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
-namespace Pfm.Infrastructure.Data
+namespace Pfm.Infrastructure.Persistence.DbContexts
 {
     public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<PfmDbContext>
     {

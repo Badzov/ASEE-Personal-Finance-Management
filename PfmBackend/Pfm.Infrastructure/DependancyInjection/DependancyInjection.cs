@@ -3,11 +3,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Pfm.Application.Interfaces;
 using Pfm.Domain.Interfaces;
-using Pfm.Infrastructure.Data;
-using Pfm.Infrastructure.Repositories;
+using Pfm.Infrastructure.Persistence.DbContexts;
+using Pfm.Infrastructure.Persistence.Repositories;
+using Pfm.Infrastructure.Persistence.UnitOfWork;
 using Pfm.Infrastructure.Services;
 
-namespace Pfm.Infrastructure
+namespace Pfm.Infrastructure.DependancyInjection
 {
     public static class DependencyInjection
     {

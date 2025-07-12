@@ -9,7 +9,7 @@ namespace Pfm.Domain.Interfaces
 {
     public interface IUnitOfWork : IDisposable
     {
-        IRepository<Transaction> Transactions { get; }
+        ITransactionRepository Transactions { get; }
         IRepository<Category> Categories { get; }
         IRepository<Split> Splits { get; }
         Task<int> CompleteAsync();

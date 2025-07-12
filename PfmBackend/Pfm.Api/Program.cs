@@ -1,9 +1,9 @@
-using Pfm.Infrastructure;
 using Microsoft.OpenApi.Models;
-using Pfm.Application;
 using Pfm.Api.Formatters;
 using Pfm.Api.Filters;
 using Pfm.Api.Filters.Swagger;
+using Pfm.Application.DependancyInjection;
+using Pfm.Infrastructure.DependancyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
