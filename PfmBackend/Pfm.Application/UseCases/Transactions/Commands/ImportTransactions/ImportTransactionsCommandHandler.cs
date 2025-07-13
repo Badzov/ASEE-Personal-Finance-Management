@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Pfm.Application.Common;
 using Pfm.Application.Exceptions;
 using Pfm.Application.Interfaces;
+using Pfm.Application.UseCases.Transactions.Commands.CategorizeTransaction;
 using Pfm.Domain.Entities;
 using Pfm.Domain.Exceptions;
 using Pfm.Domain.Interfaces;
@@ -16,15 +18,18 @@ namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly ITransactionCsvParser _csvParser;
+        private readonly IValidator<ImportTransactionsDto> _validator;
 
         public ImportTransactionsCommandHandler(
             IUnitOfWork uow,
             IMapper mapper,
-            ITransactionCsvParser csvParser)
+            ITransactionCsvParser csvParser,
+            IValidator<ImportTransactionsDto> validator)
         {
             _uow = uow;
             _mapper = mapper;
             _csvParser = csvParser;
+            _validator = validator;
         }
 
         public async Task<Unit> Handle(ImportTransactionsCommand request, CancellationToken cancellationToken)
@@ -33,10 +38,9 @@ namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
             var parseResult = await _csvParser.ParseAsync(request.CsvStream);
 
             // 2. Apply DTO validation
-            var validator = new ImportTransactionsDtoValidator();
             foreach (var record in parseResult.ValidRecords.ToList())
             {
-                var validationResult = await validator.ValidateAsync(record);
+                var validationResult = await _validator.ValidateAsync(record);
                 if (!validationResult.IsValid)
                 {
                     parseResult.ValidRecords.Remove(record);

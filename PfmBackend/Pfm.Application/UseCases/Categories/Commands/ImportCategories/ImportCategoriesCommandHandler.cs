@@ -21,16 +21,16 @@ namespace Pfm.Application.UseCases.Categories.Commands.ImportCategories
     {
         private readonly IUnitOfWork _uow;
         private readonly ICategoriesCsvParser _parser;
-        private readonly IMapper _mapper;
+        private readonly IValidator<ImportCategoriesDto> _validator;
 
         public ImportCategoriesCommandHandler(
             IUnitOfWork uow,
             ICategoriesCsvParser parser,
-            IMapper mapper)
+            IValidator<ImportCategoriesDto> validator)
         {
             _uow = uow;
             _parser = parser;
-            _mapper = mapper;
+            _validator = validator;
         }
 
         public async Task<Unit> Handle(ImportCategoriesCommand command, CancellationToken ct)
@@ -39,10 +39,9 @@ namespace Pfm.Application.UseCases.Categories.Commands.ImportCategories
             var parseResult = _parser.Parse(command.CsvStream);
 
             // 2. Apply DTO validation
-            var validator = new ImportCategoriesDtoValidator();
             foreach (var record in parseResult.ValidRecords.ToList())
             {
-                var validationResult = await validator.ValidateAsync(record);
+                var validationResult = await _validator.ValidateAsync(record);
                 if (!validationResult.IsValid)
                 {
                     parseResult.ValidRecords.Remove(record);

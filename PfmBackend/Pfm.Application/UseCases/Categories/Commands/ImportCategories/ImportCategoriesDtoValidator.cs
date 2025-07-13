@@ -12,7 +12,9 @@ namespace Pfm.Application.UseCases.Categories.Commands.ImportCategories
         public ImportCategoriesDtoValidator()
         {
             RuleFor(x => x.Code)
-                .NotEmpty().WithMessage("Code is required");
+                .NotEmpty().WithMessage("Code is required")
+                .MaximumLength(10).WithMessage("Category code cannot exceed 10 characters")
+                .Matches("^[A-Z0-9-]+$").WithMessage("Only uppercase letters, numbers and hyphens allowed");
 
             RuleFor(x => x.Name)
                 .NotEmpty().WithMessage("Name is required");
