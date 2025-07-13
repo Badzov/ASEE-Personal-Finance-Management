@@ -1,15 +1,12 @@
 ﻿using AutoMapper;
-using CsvHelper;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Pfm.Application.Common;
 using Pfm.Application.Exceptions;
 using Pfm.Application.Interfaces;
-using Pfm.Application.UseCases.Transactions.Mappings;
 using Pfm.Domain.Entities;
 using Pfm.Domain.Exceptions;
 using Pfm.Domain.Interfaces;
-using System.Globalization;
 
 
 namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
@@ -18,18 +15,15 @@ namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
     {
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
-        private readonly ILogger<ImportTransactionsCommandHandler> _logger;
         private readonly ITransactionCsvParser _csvParser;
 
         public ImportTransactionsCommandHandler(
             IUnitOfWork uow,
             IMapper mapper,
-            ILogger<ImportTransactionsCommandHandler> logger,
             ITransactionCsvParser csvParser)
         {
             _uow = uow;
             _mapper = mapper;
-            _logger = logger;
             _csvParser = csvParser;
         }
 
@@ -84,6 +78,8 @@ namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
             {
                 throw new DomainValidationException(domainErrors);
             }
+
+            //Here we cannot handle the exceptions thrown in Infrastructure due to no dependancy on Infrastructure layer, we can just let the API layer handle these
 
             await _uow.Transactions.AddRangeAsync(validTransactions);
             await _uow.CompleteAsync();

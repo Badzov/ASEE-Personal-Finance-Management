@@ -22,6 +22,7 @@ namespace Pfm.Infrastructure.DependancyInjection
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ITransactionCsvParser, TransactionCsvParser>();
+            services.AddScoped<ICategoriesCsvParser, CategoriesCsvParser>();
 
             return services;
         }

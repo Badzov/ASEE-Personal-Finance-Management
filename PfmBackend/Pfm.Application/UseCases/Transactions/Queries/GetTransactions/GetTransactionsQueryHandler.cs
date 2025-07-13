@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MediatR;
 using Pfm.Application.Common;
+using Pfm.Domain.Common;
 using Pfm.Application.Exceptions;
 using Pfm.Domain.Interfaces;
 using System;

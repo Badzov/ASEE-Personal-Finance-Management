@@ -1,11 +1,5 @@
 ﻿using MediatR;
-using Pfm.Application.Common;
-using Pfm.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Pfm.Domain.Common;
 
 namespace Pfm.Application.UseCases.Transactions.Queries.GetTransactions
 {

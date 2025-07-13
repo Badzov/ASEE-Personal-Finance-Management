@@ -2,12 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Pfm.Api.Schemas;
 using Pfm.Application.Common;
+using Pfm.Domain.Common;
 using Pfm.Application.UseCases.Transactions.Commands.ImportTransactions;
 using Pfm.Application.UseCases.Transactions.Queries.GetTransactions;
-using Pfm.Domain.Entities;
-using Pfm.Domain.Enums;
-using System.Drawing;
-using System.Security.Policy;
 using System.Text;
 
 namespace Pfm.Api.Controllers
@@ -24,9 +21,9 @@ namespace Pfm.Api.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(PaginatedResult<TransactionDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(PaginatedResult<TransactionDto>), 200)]
+        [ProducesResponseType(typeof(ApiErrorResponse),400)]
+        [ProducesResponseType(typeof(ApiErrorResponse), 422)]
         public async Task<IActionResult> GetTransactions(
             [FromQuery] DateTime? startDate,
             [FromQuery] DateTime? endDate,
@@ -59,7 +56,6 @@ namespace Pfm.Api.Controllers
         [Consumes("text/csv")]
         [ProducesResponseType(200)]
         [ProducesResponseType(typeof(ApiErrorResponse), 400)]
-        [ProducesResponseType(typeof(ApiErrorResponse), 404)]
         [ProducesResponseType(typeof(ApiErrorResponse), 409)]
         [ProducesResponseType(typeof(ApiErrorResponse), 422)]
         [ProducesResponseType(500)]
