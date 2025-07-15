@@ -1,11 +1,8 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using MediatR;
-using Microsoft.Extensions.Logging;
 using Pfm.Application.Common;
-using Pfm.Application.Exceptions;
 using Pfm.Application.Interfaces;
-using Pfm.Application.UseCases.Transactions.Commands.CategorizeTransaction;
 using Pfm.Domain.Entities;
 using Pfm.Domain.Exceptions;
 using Pfm.Domain.Interfaces;
@@ -17,13 +14,13 @@ namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
     {
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
-        private readonly ITransactionCsvParser _csvParser;
+        private readonly ITransactionsCsvParser _csvParser;
         private readonly IValidator<ImportTransactionsDto> _validator;
 
         public ImportTransactionsCommandHandler(
             IUnitOfWork uow,
             IMapper mapper,
-            ITransactionCsvParser csvParser,
+            ITransactionsCsvParser csvParser,
             IValidator<ImportTransactionsDto> validator)
         {
             _uow = uow;
@@ -32,63 +29,58 @@ namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
             _validator = validator;
         }
 
-        public async Task<Unit> Handle(ImportTransactionsCommand request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(
+            ImportTransactionsCommand request,
+            CancellationToken ct)
         {
             // 1. Parse CSV with basic validation
             var parseResult = await _csvParser.ParseAsync(request.CsvStream);
 
-            // 2. Apply DTO validation
-            foreach (var record in parseResult.ValidRecords.ToList())
-            {
-                var validationResult = await _validator.ValidateAsync(record);
-                if (!validationResult.IsValid)
-                {
-                    parseResult.ValidRecords.Remove(record);
-                    parseResult.Errors.AddRange(validationResult.Errors.Select(e =>
-                        new RecordError(record.Id, e.ErrorCode, e.ErrorMessage)));
-                }
-            }
-
-            // Short-circuit if any CSV or DTO errors exist
+            // Short-circuit if CSV parsing failed
             if (parseResult.HasErrors)
             {
-                throw new AppException(
-                    parseResult.Errors.Select(e => new AppError(e.RecordId, e.ErrorCode, e.Message)).ToList(),
-                    "CSV/DTO validation failed");
+                parseResult.ThrowIfErrors();
             }
 
-            // 3. Apply Domain (business) validation
-            var domainErrors = new List<AppError>();
+            // 3. Process each record with full validation
+            var validationErrors = new List<ValidationError>();
             var validTransactions = new List<Transaction>();
 
             foreach (var record in parseResult.ValidRecords)
             {
+                // DTO validation
+                var validationResult = await _validator.ValidateAsync(record, ct);
+                if (!validationResult.IsValid)
+                {
+                    validationErrors.AddRange(validationResult.Errors.Select(e =>
+                        new ValidationError(record.Id, e.ErrorCode, e.ErrorMessage)));
+                    continue;
+                }
+
                 try
                 {
                     var transaction = _mapper.Map<Transaction>(record);
-                    transaction.Validate(); 
+                    transaction.Validate();
                     validTransactions.Add(transaction);
                 }
-                catch (DomainException ex)
+
+                // Here we just rethrow because we don't want the BusinessRuleExceptions to be masked as ValidationErrors
+                catch (BusinessRuleException ex)
                 {
-                    domainErrors.Add(new AppError(
-                        record.Id,
-                        ex.ErrorCode,
-                        ex.Message));
+                    throw ex;
                 }
             }
 
-            if (domainErrors.Any())
+            if (validationErrors.Any())
             {
-                throw new DomainValidationException(domainErrors);
+                throw new ValidationProblemException(validationErrors);
             }
-
-            //Here we cannot handle the exceptions thrown in Infrastructure due to no dependancy on Infrastructure layer, we can just let the API layer handle these
 
             await _uow.Transactions.AddRangeAsync(validTransactions);
             await _uow.CompleteAsync();
 
             return Unit.Value;
         }
-    }  
-}
+    }
+}  
+

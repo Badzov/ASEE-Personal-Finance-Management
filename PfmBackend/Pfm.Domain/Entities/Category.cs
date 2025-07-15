@@ -32,22 +32,12 @@ namespace Pfm.Domain.Entities
             Code = code;
             Name = name;
             ParentCode = parentCode;
-            Validate();
         }
 
         public void UpdateName(string name)
         {
             Name = name;
-            Validate();
         }
 
-        private void Validate()
-        {
-            if (string.IsNullOrWhiteSpace(Code))
-                throw new DomainException("invalid-code", "Category code is required");
-
-            if (string.IsNullOrWhiteSpace(Name))
-                throw new DomainException("invalid-name", "Category name is required");
-        }
     }
 }

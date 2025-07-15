@@ -3,17 +3,10 @@ using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Pfm.Application.Common;
-using Pfm.Application.Exceptions;
 using Pfm.Application.Interfaces;
-using Pfm.Application.UseCases.Transactions.Commands.ImportTransactions;
 using Pfm.Domain.Entities;
 using Pfm.Domain.Exceptions;
 using Pfm.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Pfm.Application.UseCases.Categories.Commands.ImportCategories
 {
@@ -22,87 +15,116 @@ namespace Pfm.Application.UseCases.Categories.Commands.ImportCategories
         private readonly IUnitOfWork _uow;
         private readonly ICategoriesCsvParser _parser;
         private readonly IValidator<ImportCategoriesDto> _validator;
+        private readonly ILogger<ImportCategoriesCommandHandler> _logger;
 
         public ImportCategoriesCommandHandler(
             IUnitOfWork uow,
             ICategoriesCsvParser parser,
-            IValidator<ImportCategoriesDto> validator)
+            IValidator<ImportCategoriesDto> validator,
+            ILogger<ImportCategoriesCommandHandler> logger)
         {
             _uow = uow;
             _parser = parser;
             _validator = validator;
+            _logger = logger;
         }
 
         public async Task<Unit> Handle(ImportCategoriesCommand command, CancellationToken ct)
         {
             // 1. Parse CSV with basic validation
-            var parseResult = _parser.Parse(command.CsvStream);
+            var parseResult = await _parser.ParseAsync(command.CsvStream);
 
-            // 2. Apply DTO validation
-            foreach (var record in parseResult.ValidRecords.ToList())
-            {
-                var validationResult = await _validator.ValidateAsync(record);
-                if (!validationResult.IsValid)
-                {
-                    parseResult.ValidRecords.Remove(record);
-                    parseResult.Errors.AddRange(validationResult.Errors.Select(e =>
-                        new RecordError(record.Code, e.ErrorCode, e.ErrorMessage)));
-                }
-            }
-
-            // Short-circuit if any CSV or DTO errors exist
+            // Short-circuit if CSV parsing failed
             if (parseResult.HasErrors)
             {
-                throw new AppException(
-                    parseResult.Errors.Select(e =>
-                        new AppError(e.RecordId, e.ErrorCode, e.Message)).ToList(),
-                    "CSV/DTO validation failed");
+                _logger.LogWarning("CSV parsing failed with {ErrorCount} errors", parseResult.Errors.Count);
+                parseResult.ThrowIfErrors(); // Throws ValidationProblemException
             }
 
-            // 3. Apply Domain (business) validation
+            // 2. Get existing categories once
             var existingCategories = await _uow.Categories.GetAllAsync();
-            var domainErrors = new List<AppError>();
-            var validCategories = new List<Category>();
+            var validationErrors = new List<ValidationError>();
+            var categoriesToProcess = new List<Category>();
 
+            // 3. Process each record with full validation
             foreach (var record in parseResult.ValidRecords)
             {
+                // DTO validation
+                var validationResult = await _validator.ValidateAsync(record, ct);
+                if (!validationResult.IsValid)
+                {
+                    validationErrors.AddRange(validationResult.Errors.Select(e =>
+                        new ValidationError(record.Code, e.ErrorCode, e.ErrorMessage)));
+                    continue;
+                }
+
                 try
                 {
-                    var existing = existingCategories.FirstOrDefault(c => c.Code == record.Code);
-                    if (existing != null)
-                    {
-                        existing.UpdateName(record.Name);
-                        validCategories.Add(existing);
-                    }
-                    else
-                    {
-                        if (!string.IsNullOrEmpty(record.ParentCode) &&
-                            !existingCategories.Any(c => c.Code == record.ParentCode))
-                        {
-                            throw new DomainException(
-                                "invalid-parent",
-                                $"Parent code '{record.ParentCode}' does not exist");
-                        }
-
-                        var newCategory = new Category(record.Code, record.Name, record.ParentCode);
-                        validCategories.Add(newCategory);
-                    }
+                    var category = ProcessCategory(record, existingCategories);
+                    categoriesToProcess.Add(category);
                 }
-                catch (DomainException ex)
+                catch (BusinessRuleException ex)
                 {
-                    domainErrors.Add(new AppError(record.Code, ex.ErrorCode, ex.Message));
+                    validationErrors.Add(new ValidationError(record.Code, ex.ProblemCode, ex.Message));
                 }
             }
 
-            if (domainErrors.Any())
+            // 4. Handle validation failures
+            if (validationErrors.Any())
             {
-                throw new DomainValidationException(domainErrors);
+                _logger.LogWarning("Domain validation failed with {ErrorCount} errors", validationErrors.Count);
+                throw new ValidationProblemException(validationErrors);
             }
 
-            // Persist changes
-            foreach (var category in validCategories.Where(c => c.Code != null))
+            // 5. Persist valid categories
+            await ProcessCategories(categoriesToProcess);
+            await _uow.CompleteAsync();
+
+            _logger.LogInformation("Successfully imported {Count} categories", categoriesToProcess.Count);
+            return Unit.Value;
+        }
+
+        private Category ProcessCategory(ImportCategoriesDto record, IEnumerable<Category> existingCategories)
+        {
+            var existing = existingCategories.FirstOrDefault(c => c.Code == record.Code);
+
+            if (existing != null)
             {
-                if (existingCategories.Any(c => c.Code == category.Code))
+                existing.UpdateName(record.Name);
+                return existing;
+            }
+
+            // Validate parent exists if specified
+            if (!string.IsNullOrEmpty(record.ParentCode) &&
+                !existingCategories.Any(c => c.Code == record.ParentCode))
+            {
+                throw new BusinessRuleException(
+                    "invalid-parent",
+                    $"Parent category '{record.ParentCode}' does not exist",
+                    $"Code: {record.Code}, Parent: {record.ParentCode}");
+            }
+
+            return new Category(record.Code, record.Name, record.ParentCode);
+        }
+
+        private async Task ProcessCategories(IEnumerable<Category> categories)
+        {
+            foreach (var category in categories)
+            {
+                if (category.ParentCode != null)
+                {
+                    // Ensure the parent exists (double-check)
+                    var parentExists = await _uow.Categories.ExistsAsync(category.ParentCode);
+                    if (!parentExists)
+                    {
+                        throw new BusinessRuleException(
+                            "invalid-parent",
+                            $"Parent category '{category.ParentCode}' not found",
+                            $"For category: {category.Code}");
+                    }
+                }
+
+                if (await _uow.Categories.ExistsAsync(category.Code))
                 {
                     await _uow.Categories.UpdateAsync(category);
                 }
@@ -111,9 +133,6 @@ namespace Pfm.Application.UseCases.Categories.Commands.ImportCategories
                     await _uow.Categories.AddAsync(category);
                 }
             }
-
-            await _uow.CompleteAsync();
-            return Unit.Value;
         }
     }
 

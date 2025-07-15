@@ -11,51 +11,48 @@ namespace Pfm.Infrastructure.Services
 {
     public class CategoriesCsvParser : ICategoriesCsvParser
     {
-        public ImportResult<ImportCategoriesDto> Parse(Stream stream)
+        public async Task<ImportResult<ImportCategoriesDto>> ParseAsync(Stream stream)
         {
-            using var reader = new StreamReader(stream);
-            using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
-            {
-                MissingFieldFound = null, 
-                TrimOptions = TrimOptions.Trim
-            }); ;
-
-            csv.Context.RegisterClassMap<CategoryCsvMap>();
-            var records = new List<ImportCategoriesDto>();
-            var errors = new List<RecordError>();
+            var result = new ImportResult<ImportCategoriesDto>();
 
             try
             {
-                while (csv.Read())
+                using var reader = new StreamReader(stream);
+                using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+                {
+                    MissingFieldFound = null,
+                    TrimOptions = TrimOptions.Trim
+                });
+
+                csv.Context.RegisterClassMap<CategoryCsvMap>();
+
+                while (await csv.ReadAsync())
                 {
                     try
                     {
-                        records.Add(csv.GetRecord<ImportCategoriesDto>());
+                        var record = csv.GetRecord<ImportCategoriesDto>();
+                        result.AddValidRecord(record);
                     }
                     catch (CsvHelperException ex)
                     {
-                        errors.Add(new RecordError(
+                        result.AddError(
                             csv.GetField("code") ?? "unknown",
                             "csv-parse-error",
                             ex.Message
-                        ));
+                        );
                     }
                 }
             }
             catch (Exception ex) when (ex is HeaderValidationException || ex is ReaderException)
             {
-                errors.Add(new RecordError(
-                    "file",
-                    "invalid-file",
-                    "Invalid CSV format"
-                ));
+                result.AddError("file", "invalid-file", "Invalid CSV format");
+            }
+            catch (Exception ex)
+            {
+                result.AddError("file", "processing-error", $"Error processing CSV: {ex.Message}");
             }
 
-            return new ImportResult<ImportCategoriesDto>
-            {
-                ValidRecords = records,
-                Errors = errors
-            };
+            return result;
         }
     }
 }

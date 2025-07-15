@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Pfm.Api.Schemas;
+using Pfm.Api.Models.Problems;
 using Pfm.Application.UseCases.Categories.Commands.ImportCategories;
 using System.Text;
 
@@ -20,10 +20,8 @@ namespace Pfm.Api.Controllers
         [HttpPost("import")]
         [Consumes("text/csv")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ApiErrorResponse), 409)]
-        [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status422UnprocessableEntity)]
-        [ProducesResponseType(500)]
+        [ProducesResponseType(typeof(ValidationProblem), 400)]
+        [ProducesResponseType(typeof(BusinessProblem), 440)]
         public async Task<IActionResult> ImportCategories([FromBody] string csvContent)
         {
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(csvContent));

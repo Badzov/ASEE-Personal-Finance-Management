@@ -6,5 +6,9 @@ using System.Threading.Tasks;
 
 namespace Pfm.Application.Common
 {
-    public record AppError(string Tag, string Error, string Message);
+    public record ValidationError(
+        string Tag,
+        string Error,  
+        string Message
+    );
 }

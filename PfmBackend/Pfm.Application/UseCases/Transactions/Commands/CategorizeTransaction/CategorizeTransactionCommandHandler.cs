@@ -2,14 +2,8 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Pfm.Application.Common;
-using Pfm.Application.Exceptions;
 using Pfm.Domain.Exceptions;
 using Pfm.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Pfm.Application.UseCases.Transactions.Commands.CategorizeTransaction
 {
@@ -29,35 +23,40 @@ namespace Pfm.Application.UseCases.Transactions.Commands.CategorizeTransaction
             _validator = validator;
         }
 
-        public async Task<Unit> Handle(CategorizeTransactionCommand request, CancellationToken ct)
+        public async Task<Unit> Handle(
+            CategorizeTransactionCommand request,
+            CancellationToken ct)
         {
-            // 1. Apply DTO validation
+            // Validate DTO
             var validationResult = await _validator.ValidateAsync(
-                new TransactionCategoryDto(request.CategoryCode));
+                new TransactionCategoryDto(request.CategoryCode), ct);
+
             if (!validationResult.IsValid)
             {
-                throw new AppException(
+                throw new ValidationProblemException(
                     validationResult.Errors.Select(e =>
-                        new AppError("category", e.ErrorCode, e.ErrorMessage)).ToList(),
-                    "Validation failed");
+                        new ValidationError("category", e.ErrorCode, e.ErrorMessage)));
             }
 
-            // 2. Check existence (technically domain validation)
+            // Check existence
             var transaction = await _uow.Transactions.GetByIdAsync(request.TransactionId)
-                ?? throw new DomainException(
+                ?? throw new BusinessRuleException(
                     "transaction-not-found",
                     $"Transaction {request.TransactionId} not found");
 
             var category = await _uow.Categories.GetByIdAsync(request.CategoryCode)
-                ?? throw new DomainException(
+                ?? throw new BusinessRuleException(
                     "category-not-found",
                     $"Category {request.CategoryCode} not found");
 
-            
+            // Apply changes
             transaction.CatCode = request.CategoryCode;
             await _uow.CompleteAsync();
 
-            _logger.LogInformation("Categorized transaction {Id}", request.TransactionId);
+            _logger.LogInformation(
+                "Categorized transaction {TransactionId} with category {CategoryCode}",
+                request.TransactionId,
+                request.CategoryCode);
 
             return Unit.Value;
         }

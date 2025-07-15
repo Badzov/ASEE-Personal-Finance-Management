@@ -14,5 +14,6 @@ namespace Pfm.Domain.Interfaces
         Task AddRangeAsync(IEnumerable<T> entities);
         Task UpdateAsync(T entity);
         Task DeleteAsync(string id);
+        Task<bool> ExistsAsync(string id, CancellationToken ct = default);
     }
 }

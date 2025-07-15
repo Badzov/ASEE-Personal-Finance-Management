@@ -21,7 +21,7 @@ namespace Pfm.Infrastructure.DependancyInjection
             services.AddDbContext<PfmDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("MSSQLPfmDatabase")));
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<ITransactionCsvParser, TransactionCsvParser>();
+            services.AddScoped<ITransactionsCsvParser, TransactionCsvParser>();
             services.AddScoped<ICategoriesCsvParser, CategoriesCsvParser>();
 
             return services;

@@ -36,7 +36,7 @@ namespace Pfm.Infrastructure.Persistence.UnitOfWork
             }
             catch (DbUpdateException ex)
             {
-                throw new DatabaseOperationException("save", ex.InnerException?.Message ?? ex.Message);
+                throw new PersistenceException("save", ex.InnerException?.Message ?? ex.Message);
             }
         }
 

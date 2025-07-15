@@ -1,4 +1,5 @@
 ﻿using Pfm.Application.Common;
+using Pfm.Application.UseCases.Categories.Commands.ImportCategories;
 using Pfm.Application.UseCases.Transactions.Commands.ImportTransactions;
 using System;
 using System.Collections.Generic;
@@ -8,8 +9,11 @@ using System.Threading.Tasks;
 
 namespace Pfm.Application.Interfaces
 {
-    public interface ITransactionCsvParser
+    public interface ITransactionsCsvParser
     {
-        Task<ImportResult<ImportTransactionsDto>> ParseAsync(Stream csvStream);
+        Task<ImportResult<ImportTransactionsDto>> ParseAsync(Stream stream);
     }
+
+    
+
 }

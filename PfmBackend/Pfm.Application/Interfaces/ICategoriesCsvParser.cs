@@ -10,6 +10,6 @@ namespace Pfm.Application.Interfaces
 {
     public interface ICategoriesCsvParser
     {
-        ImportResult<ImportCategoriesDto> Parse(Stream stream);
+        Task<ImportResult<ImportCategoriesDto>> ParseAsync(Stream stream);
     }
 }

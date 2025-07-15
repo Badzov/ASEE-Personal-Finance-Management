@@ -16,10 +16,12 @@ namespace Pfm.Infrastructure.Persistence.Repositories
     {
         internal readonly PfmDbContext _context;
         private readonly string _entityName = typeof(T).Name;
+        protected readonly DbSet<T> _dbSet;
 
         public Repository(PfmDbContext context)
         {
             _context = context;
+            _dbSet = context.Set<T>();
         }
 
 
@@ -36,7 +38,7 @@ namespace Pfm.Infrastructure.Persistence.Repositories
             }
             catch (DbUpdateException ex)
             {
-                throw new DatabaseOperationException("insert", ex.InnerException?.Message ?? ex.Message);
+                throw new PersistenceException("insert", ex.InnerException?.Message ?? ex.Message);
             }
         }
         public async Task AddRangeAsync(IEnumerable<T> entities)
@@ -64,13 +66,29 @@ namespace Pfm.Infrastructure.Persistence.Repositories
             }
             catch (DbUpdateException ex)
             {
-                throw new DatabaseOperationException("update", ex.InnerException?.Message ?? ex.Message);
+                throw new PersistenceException("update", ex.InnerException?.Message ?? ex.Message);
             }
         }
         public async Task DeleteAsync(string id)
         {
             var entity = await GetByIdAsync(id);
             if (entity != null) _context.Set<T>().Remove(entity);
+        }
+
+        public async Task<bool> ExistsAsync(string id, CancellationToken ct = default)
+        {
+            // For entities with string keys named "Code"
+            if (typeof(T).GetProperty("Code") != null)
+            {
+                return await _dbSet.AnyAsync(e => EF.Property<string>(e, "Code") == id, ct);
+            }
+            // For entities with string keys named "Id"
+            else if (typeof(T).GetProperty("Id") != null)
+            {
+                return await _dbSet.AnyAsync(e => EF.Property<string>(e, "Id") == id, ct);
+            }
+
+            throw new NotSupportedException($"Entity {typeof(T).Name} doesn't have a supported key property");
         }
 
 

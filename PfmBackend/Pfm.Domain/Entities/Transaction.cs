@@ -48,11 +48,11 @@ namespace Pfm.Domain.Entities
         {
             if (Amount <= 0)
             {
-                throw new DomainException("invalid-amount", "Transaction amount must be positive");
+                throw new BusinessRuleException("invalid-amount", "Transaction amount must be positive");
             }
 
             if (Mcc.HasValue && !Enum.IsDefined(typeof(MccCode), Mcc.Value))
-                throw new DomainException("invalid-mcc", $"Invalid MCC code: {Mcc.Value}");
+                throw new BusinessRuleException("invalid-mcc", $"Invalid MCC code: {Mcc.Value}");
         }
     }
 

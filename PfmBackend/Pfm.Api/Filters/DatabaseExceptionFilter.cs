@@ -13,40 +13,23 @@ namespace Pfm.Api.Filters
     {
         public void OnException(ExceptionContext context)
         {
-            switch (context.Exception)
+            if (context.Exception is PersistenceException persistenceEx)
             {
-                case RecordNotFoundException ex:
-                    context.Result = new NotFoundObjectResult(new
+                var problem = new ProblemDetails
+                {
+                    Title = "Database operation failed",
+                    Detail = persistenceEx.Message,
+                    Status = persistenceEx switch
                     {
-                        error = "not-found",
-                        entityId = ex.EntityId,
-                        message = ex.Message
-                    });
-                    break;
+                        ConcurrentUpdateException => StatusCodes.Status409Conflict,
+                        RecordNotFoundException => StatusCodes.Status404NotFound,
+                        _ => StatusCodes.Status500InternalServerError
+                    }
+                };
 
-                case ConcurrentUpdateException:
-                    context.Result = new ConflictObjectResult(new
-                    {
-                        error = "concurrency",
-                        message = "The record was modified by another user. Please refresh and try again."
-                    });
-                    break;
-
-                case DatabaseOperationException ex:
-                    context.Result = new ObjectResult(new
-                    {
-                        error = "database-error",
-                        operation = ex.OperationType,
-                        message = ex.Message
-                    })
-                    {
-                        StatusCode = 500
-                    };
-                    break;
-            }
-
-            if (context.Result != null)
+                context.Result = new ObjectResult(problem) { StatusCode = problem.Status };
                 context.ExceptionHandled = true;
+            }
         }
     }
 }

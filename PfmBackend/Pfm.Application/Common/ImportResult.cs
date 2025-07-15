@@ -6,12 +6,37 @@ using System.Threading.Tasks;
 
 namespace Pfm.Application.Common
 {
-    public record ImportResult<T>
+    public class ImportResult<T>
     {
-        public List<T> ValidRecords { get; init; } = new();
-        public List<RecordError> Errors { get; init; } = new();
+        public List<T> ValidRecords { get; } = new();
+        public IReadOnlyList<ValidationError> Errors { get; }
         public bool HasErrors => Errors.Any();
-    }
 
-    public record RecordError(string RecordId, string ErrorCode, string Message);
+        private readonly List<ValidationError> _errors = new();
+
+        public ImportResult()
+        {
+            Errors = _errors.AsReadOnly();
+        }
+
+        public void AddValidRecord(T record) => ValidRecords.Add(record);
+
+        public void AddError(string tag, string error, string message)
+        {
+            _errors.Add(new ValidationError(tag, error, message));
+        }
+
+        public void AddError(ValidationError error)
+        {
+            _errors.Add(error);
+        }
+
+        public void ThrowIfErrors()
+        {
+            if (HasErrors)
+            {
+                throw new ValidationProblemException(Errors);
+            }
+        }
+    }
 }

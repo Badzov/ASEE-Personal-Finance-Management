@@ -6,6 +6,7 @@ using Pfm.Application.DependancyInjection;
 using Pfm.Infrastructure.DependancyInjection;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using Pfm.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,19 +18,20 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddInfrastructure();
-builder.Services.AddApplicationServices(); 
+builder.Services.AddApplicationServices();
+
 
 builder.Services.AddControllers(options =>
 {
     options.InputFormatters.Insert(0, new TextPlainInputFormatter());
-    options.Filters.Add<AppExceptionFilter>();
-    options.Filters.Add<DomainExceptionFilter>();
     options.Filters.Add<DatabaseExceptionFilter>();
 });
 
 var app = builder.Build();
 
 app.MapControllers();
+
+app.UseMiddleware<ProblemDetailsMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

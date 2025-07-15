@@ -2,13 +2,8 @@
 using MediatR;
 using Pfm.Application.Common;
 using Pfm.Domain.Common;
-using Pfm.Application.Exceptions;
+using Pfm.Domain.Exceptions;
 using Pfm.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Pfm.Application.UseCases.Transactions.Queries.GetTransactions
 {
@@ -30,24 +25,34 @@ namespace Pfm.Application.UseCases.Transactions.Queries.GetTransactions
 
             if (!validationResult.IsValid)
             {
-                throw new AppException(validationResult.Errors.Select(e => new AppError("filters", e.ErrorCode, e.ErrorMessage)).ToList(), "Invalid filters");
+                throw new ValidationProblemException(validationResult.Errors.Select(e => new ValidationError("filters", e.ErrorCode, e.ErrorMessage)).ToList());
             }
 
-            var (transactions, totalCount) = await _uow.Transactions.GetFilteredAsync(
-                query.Filters.StartDate,
-                query.Filters.EndDate,
-                query.Filters.Kinds,
-                query.Filters.PageNumber,
-                query.Filters.PageSize,
-                cancellationToken
-            );
+            try
+            {
+                var (transactions, totalCount) = await _uow.Transactions.GetFilteredAsync(
+                    query.Filters.StartDate,
+                    query.Filters.EndDate,
+                    query.Filters.Kinds,
+                    query.Filters.PageNumber,
+                    query.Filters.PageSize,
+                    cancellationToken
+                );
 
-            return new PaginatedResult<TransactionDto>(
-                _mapper.Map<List<TransactionDto>>(transactions),
-                totalCount,
-                query.Filters.PageNumber,
-                query.Filters.PageSize
-            );
+                return new PaginatedResult<TransactionDto>(
+                    _mapper.Map<List<TransactionDto>>(transactions),
+                    totalCount,
+                    query.Filters.PageNumber,
+                    query.Filters.PageSize
+                );
+            }
+            catch (Exception ex)
+            {
+                throw new BusinessRuleException(
+                    "transaction-retrieval-failed",
+                    "Failed to retrieve transactions",
+                    ex.Message);
+            }
         }
     }
 }

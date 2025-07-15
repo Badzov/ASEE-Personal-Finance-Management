@@ -7,7 +7,7 @@ using System.Globalization;
 
 namespace Pfm.Infrastructure.Services
 {
-    public class TransactionCsvParser : ITransactionCsvParser
+    public class TransactionCsvParser : ITransactionsCsvParser
     {
         public async Task<ImportResult<ImportTransactionsDto>> ParseAsync(Stream csvStream)
         {
@@ -25,16 +25,20 @@ namespace Pfm.Infrastructure.Services
 
                     if (string.IsNullOrWhiteSpace(record.Id))
                     {
-                        result.Errors.Add(new(recordId, "missing-id", "Transaction ID is required"));
+                        result.AddError(recordId, "required", "Transaction ID is required");
                         continue;
                     }
 
-                    result.ValidRecords.Add(record);
+                    result.AddValidRecord(record);
                 }
             }
             catch (CsvHelperException ex)
             {
-                result.Errors.Add(new("file", "invalid-csv", ex.Message));
+                result.AddError("file", "invalid-csv", ex.Message);
+            }
+            catch (Exception ex)
+            {
+                result.AddError("file", "processing-error", $"Error processing CSV: {ex.Message}");
             }
 
             return result;
