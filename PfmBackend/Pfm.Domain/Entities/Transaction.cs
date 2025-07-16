@@ -9,8 +9,10 @@ namespace Pfm.Domain.Entities
     {
         [Key]
         [Required]
-        public string Id { get; set; } 
+        [StringLength(8)]
+        public string Id { get; set; }
 
+        [StringLength(50)]
         public string? BeneficiaryName { get; set; }
 
         [Required]
@@ -21,8 +23,9 @@ namespace Pfm.Domain.Entities
 
         [Required]
         [Column(TypeName = "decimal(18,2)")]
-        public decimal Amount { get; set; }
+        public double Amount { get; set; }
 
+        [StringLength(100)]
         public string? Description { get; set; }
 
         [Required]
@@ -34,6 +37,7 @@ namespace Pfm.Domain.Entities
         [Required]
         public TransactionKind Kind { get; set; }
 
+        [StringLength(4)]
         public string? CatCode { get; set; }
 
         // Navigation

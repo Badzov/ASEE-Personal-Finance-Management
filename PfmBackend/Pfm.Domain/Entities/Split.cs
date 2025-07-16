@@ -13,17 +13,20 @@ namespace Pfm.Domain.Entities
 
         [Key]
         [Required]
+        [StringLength(8)]
         public int Id { get; set; }
 
         [Required]
+        [StringLength(8)]
         public string TransactionId { get; set; }
 
         [Required]
+        [StringLength(4)]
         public string CatCode { get; set; }
 
         [Required]
         [Column(TypeName = "decimal(18,2)")]
-        public decimal Amount { get; set; }
+        public double Amount { get; set; }
 
         // Navigation
 

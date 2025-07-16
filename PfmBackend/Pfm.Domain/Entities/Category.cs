@@ -12,11 +12,14 @@ namespace Pfm.Domain.Entities
     {
         [Key]
         [Required]
+        [StringLength(4)]
         public string Code { get; set; }
 
         [Required]
+        [StringLength(50)]
         public string Name { get; set; }
 
+        [StringLength(4)]
         public string? ParentCode { get; set; }
 
         // Navigation

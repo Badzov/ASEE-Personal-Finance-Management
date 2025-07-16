@@ -12,8 +12,8 @@ using Pfm.Infrastructure.Persistence.DbContexts;
 namespace Pfm.Infrastructure.Migrations
 {
     [DbContext(typeof(PfmDbContext))]
-    [Migration("20250708222816_FixCascadeDelete")]
-    partial class FixCascadeDelete
+    [Migration("20250716180754_MaxValuesChange")]
+    partial class MaxValuesChange
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -28,15 +28,17 @@ namespace Pfm.Infrastructure.Migrations
             modelBuilder.Entity("Pfm.Domain.Entities.Category", b =>
                 {
                     b.Property<string>("Code")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(4)
+                        .HasColumnType("nvarchar(4)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("ParentCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(4)
+                        .HasColumnType("nvarchar(4)");
 
                     b.HasKey("Code");
 
@@ -49,20 +51,23 @@ namespace Pfm.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasMaxLength(8)
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<double>("Amount")
+                    b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("CatCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(4)
+                        .HasColumnType("nvarchar(4)");
 
                     b.Property<string>("TransactionId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
 
                     b.HasKey("Id");
 
@@ -76,18 +81,19 @@ namespace Pfm.Infrastructure.Migrations
             modelBuilder.Entity("Pfm.Domain.Entities.Transaction", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
 
-                    b.Property<double>("Amount")
+                    b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("BeneficiaryName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("CatCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(4)
+                        .HasColumnType("nvarchar(4)");
 
                     b.Property<string>("Currency")
                         .IsRequired()
@@ -98,8 +104,8 @@ namespace Pfm.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("Direction")
                         .HasColumnType("int");
@@ -122,8 +128,7 @@ namespace Pfm.Infrastructure.Migrations
                     b.HasOne("Pfm.Domain.Entities.Category", "Parent")
                         .WithMany("Subcategories")
                         .HasForeignKey("ParentCode")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Parent");
                 });
@@ -151,9 +156,7 @@ namespace Pfm.Infrastructure.Migrations
                 {
                     b.HasOne("Pfm.Domain.Entities.Category", "Category")
                         .WithMany("Transactions")
-                        .HasForeignKey("CatCode")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CatCode");
 
                     b.Navigation("Category");
                 });

@@ -37,7 +37,7 @@ namespace Pfm.Application.UseCases.Transactions.Mappings
             if (string.IsNullOrWhiteSpace(text)) return 0m;
 
             var cleanValue = text.Replace("€", "").Replace(",", "").Trim();
-            return decimal.Parse(cleanValue, CultureInfo.InvariantCulture);
+            return double.Parse(cleanValue, CultureInfo.InvariantCulture);
         }
     }
 

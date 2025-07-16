@@ -11,7 +11,7 @@ namespace Pfm.Application.UseCases.Transactions.Queries.GetTransactions
         string BeneficiaryName,
         DateTime Date,
         string Direction,
-        decimal Amount,
+        double Amount,
         string Description,
         string Currency,
         string Mcc,

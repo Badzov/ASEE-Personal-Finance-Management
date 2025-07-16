@@ -8,7 +8,7 @@ namespace Pfm.Application.UseCases.SpendingAnalytics.Queries
 {
     public record SpendingAnalysisDto(
         string CatCode,
-        decimal Amount,
+        double Amount,
         int Count
     );
 }

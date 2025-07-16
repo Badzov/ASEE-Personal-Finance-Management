@@ -12,7 +12,7 @@ namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
         public string BeneficiaryName { get; set; }
         public DateTime Date { get; set; }
         public string Direction { get; set; }
-        public decimal Amount { get; set; }
+        public double Amount { get; set; }
         public string Description { get; set; }
         public string Currency { get; set; }
         public int? Mcc { get; set; }

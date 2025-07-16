@@ -9,10 +9,10 @@ namespace Pfm.Domain.Entities
     public class SpendingAnalysis
     {
         public string CatCode { get; }
-        public decimal Amount { get; }
+        public double Amount { get; }
         public int Count { get; }
 
-        public SpendingAnalysis(string catCode, decimal amount, int count)
+        public SpendingAnalysis(string catCode, double amount, int count)
         {
             CatCode = catCode;
             Amount = amount;
