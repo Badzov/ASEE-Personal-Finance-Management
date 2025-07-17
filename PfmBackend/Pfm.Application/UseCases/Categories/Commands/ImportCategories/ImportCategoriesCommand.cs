@@ -7,5 +7,5 @@ using System.Threading.Tasks;
 
 namespace Pfm.Application.UseCases.Categories.Commands.ImportCategories
 {
-    public record ImportCategoriesCommand(Stream CsvStream) : IRequest<Unit>;
+    public record ImportCategoriesCommand(string CsvContent) : IRequest<Unit>;
 }

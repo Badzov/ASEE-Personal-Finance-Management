@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Pfm.Api.Models.Problems;
+using Pfm.Application.Common;
 using Pfm.Application.UseCases.Categories.Commands.ImportCategories;
 using System.Text;
 
@@ -24,8 +25,7 @@ namespace Pfm.Api.Controllers
         [ProducesResponseType(typeof(BusinessProblem), 440)]
         public async Task<IActionResult> ImportCategories([FromBody] string csvContent)
         {
-            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(csvContent));
-            await _mediator.Send(new ImportCategoriesCommand(stream));
+            await _mediator.Send(new ImportCategoriesCommand(csvContent));
             return Ok();
         }
     }

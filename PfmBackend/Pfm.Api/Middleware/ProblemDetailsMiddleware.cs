@@ -1,6 +1,7 @@
 ﻿using Pfm.Api.Models.Problems;
 using Pfm.Application.Common;
 using Pfm.Domain.Exceptions;
+using Pfm.Infrastructure.Exceptions;
 using System.Text.Json;
 
 namespace Pfm.Api.Middleware
@@ -8,14 +9,21 @@ namespace Pfm.Api.Middleware
     public class ProblemDetailsMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ILogger<ProblemDetailsMiddleware> _logger;
 
-        public ProblemDetailsMiddleware(RequestDelegate next) => _next = next;
+        public ProblemDetailsMiddleware(RequestDelegate next, ILogger<ProblemDetailsMiddleware> logger)
+        {
+            _next = next;
+            _logger = logger;
+        }
 
         public async Task Invoke(HttpContext context)
         {
             try
             {
                 await _next(context);
+
+
             }
             catch (Exception ex)
             {
@@ -23,26 +31,28 @@ namespace Pfm.Api.Middleware
             }
         }
 
-        private static Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            var problemResult = exception switch
+            var response = exception switch
             {
                 ValidationProblemException valEx => CreateValidationProblem(valEx),
                 BusinessRuleException bizEx => CreateBusinessProblem(bizEx),
-                _ => null
+                PersistenceException persEx => CreateDatabaseProblem(persEx),
+                _ => CreateDefaultProblem(exception)
             };
 
-            if (problemResult is (object problem, int statusCode))
+            if (exception is not (ValidationProblemException or BusinessRuleException or PersistenceException))
             {
-                context.Response.ContentType = "application/json";
-                context.Response.StatusCode = statusCode;
-                return context.Response.WriteAsync(JsonSerializer.Serialize(problem));
+                _logger.LogError(exception, "Unhandled exception occurred");
             }
 
-            return Task.CompletedTask;
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = response.StatusCode;
+            await context.Response.WriteAsync(JsonSerializer.Serialize(response.Problem));
         }
 
-        private static (object Value, int Status)? CreateValidationProblem(ValidationProblemException exception)
+
+        private static (object Problem, int StatusCode) CreateValidationProblem(ValidationProblemException exception)
         {
             return (new ValidationProblem
             {
@@ -50,7 +60,7 @@ namespace Pfm.Api.Middleware
             }, StatusCodes.Status400BadRequest);
         }
 
-        private static (object Value, int Status)? CreateBusinessProblem(BusinessRuleException exception)
+        private static (object Problem, int StatusCode) CreateBusinessProblem(BusinessRuleException exception)
         {
             return (new BusinessProblem
             {
@@ -58,6 +68,37 @@ namespace Pfm.Api.Middleware
                 Message = exception.Message,
                 Details = exception.Details
             }, 440); 
+        }
+
+        private static (object Problem, int StatusCode) CreateDatabaseProblem(PersistenceException exception)
+        {
+            return (new DefaultProblem
+            {
+                Title = "Database operation failed",
+                Status = exception switch
+                {
+                    ConcurrentUpdateException => StatusCodes.Status409Conflict,
+                    RecordNotFoundException => StatusCodes.Status404NotFound,
+                    _ => StatusCodes.Status500InternalServerError
+                },
+                Details = exception.Message
+            }, exception switch
+            {
+                ConcurrentUpdateException => StatusCodes.Status409Conflict,
+                RecordNotFoundException => StatusCodes.Status404NotFound,
+                _ => StatusCodes.Status500InternalServerError
+            });
+        }
+
+        private static (object Problem, int StatusCode) CreateDefaultProblem(
+            Exception exception)
+        {
+            return (new DefaultProblem
+            {
+                Title = "An unexpected error occurred",
+                Status = StatusCodes.Status500InternalServerError,
+                Details = "An internal server error has occurred"
+            }, StatusCodes.Status500InternalServerError);
         }
     }
 }

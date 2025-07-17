@@ -12,16 +12,16 @@ namespace Pfm.Application.UseCases.Categories.Commands.ImportCategories
         public ImportCategoriesDtoValidator()
         {
             RuleFor(x => x.Code)
-                .NotEmpty().WithErrorCode("required").WithMessage("Code is required")
-                .MaximumLength(10).WithErrorCode("max-length").WithMessage("Category code cannot exceed 10 characters")
-                .Matches("^[A-Z0-9-]+$").WithErrorCode("invalid-format").WithMessage("Only uppercase letters, numbers and hyphens allowed");
+                .NotEmpty().WithErrorCode("required").WithMessage("Code required")
+                .MaximumLength(10).WithErrorCode("max-length").WithMessage("Code can have max 10 characters")
+                .Matches("^[A-Z0-9-]+$").WithErrorCode("invalid-format").WithMessage("Code must contain only A-Z, 0-9, hyphens allowed");
 
             RuleFor(x => x.Name)
-                .NotEmpty().WithErrorCode("required").WithMessage("Name is required");
+                .NotEmpty().WithErrorCode("required").WithMessage("Name required");
 
             RuleFor(x => x.ParentCode)
-                .MaximumLength(10).WithErrorCode("max-length").WithMessage("Parent code cannot exceed 10 characters")
-                .Matches("^[A-Z0-9-]*$").WithErrorCode("invalid-format").WithMessage("Only uppercase letters, numbers and hyphens allowed");
+                .MaximumLength(10).WithErrorCode("max-length").WithMessage("Parent code can have max 10 characters")
+                .Matches("^[A-Z0-9-]*$").WithErrorCode("invalid-format").WithMessage("Parent code must contain only A-Z, 0-9, hyphens allowed");
         }
     }
 }

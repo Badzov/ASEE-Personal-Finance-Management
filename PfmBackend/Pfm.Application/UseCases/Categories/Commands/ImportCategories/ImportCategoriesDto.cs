@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace Pfm.Application.UseCases.Categories.Commands.ImportCategories
 {
-    public record ImportCategoriesDto(
-        string Code,
-        string? ParentCode,
-        string Name
-    );
+    public class ImportCategoriesDto
+    {
+        public string Code { get; set; }
+        public string? ParentCode { get; set; }
+        public string Name { get; set; }
+    }
 }

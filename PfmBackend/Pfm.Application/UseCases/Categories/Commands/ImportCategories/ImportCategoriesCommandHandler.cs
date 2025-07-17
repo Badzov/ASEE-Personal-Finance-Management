@@ -7,6 +7,7 @@ using Pfm.Application.Interfaces;
 using Pfm.Domain.Entities;
 using Pfm.Domain.Exceptions;
 using Pfm.Domain.Interfaces;
+using System.Text;
 
 namespace Pfm.Application.UseCases.Categories.Commands.ImportCategories
 {
@@ -31,8 +32,19 @@ namespace Pfm.Application.UseCases.Categories.Commands.ImportCategories
 
         public async Task<Unit> Handle(ImportCategoriesCommand command, CancellationToken ct)
         {
+            // 0. Command validation
+
+            if (string.IsNullOrEmpty(command.CsvContent))
+            {
+                throw new ValidationProblemException(new List<ValidationError> {
+                    new("csv-content", "required", "CSV content is required")
+                });
+            }
+
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(command.CsvContent));
+
             // 1. Parse CSV with basic validation
-            var parseResult = await _parser.ParseAsync(command.CsvStream);
+            var parseResult = await _parser.ParseAsync(stream);
 
             // Short-circuit if CSV parsing failed
             if (parseResult.HasErrors)
@@ -91,6 +103,7 @@ namespace Pfm.Application.UseCases.Categories.Commands.ImportCategories
             if (existing != null)
             {
                 existing.UpdateName(record.Name);
+                existing.UpdateParentCode(record.ParentCode);
                 return existing;
             }
 

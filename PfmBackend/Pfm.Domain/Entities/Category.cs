@@ -32,5 +32,10 @@ namespace Pfm.Domain.Entities
             Name = name;
         }
 
+        public void UpdateParentCode(string parentCode)
+        {
+            ParentCode = parentCode;
+        }
+
     }
 }
