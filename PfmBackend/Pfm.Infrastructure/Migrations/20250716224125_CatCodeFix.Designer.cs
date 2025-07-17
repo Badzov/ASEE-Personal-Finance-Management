@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Pfm.Infrastructure.Persistence.DbContexts;
 
@@ -11,9 +12,11 @@ using Pfm.Infrastructure.Persistence.DbContexts;
 namespace Pfm.Infrastructure.Migrations
 {
     [DbContext(typeof(PfmDbContext))]
-    partial class PfmDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250716224125_CatCodeFix")]
+    partial class CatCodeFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

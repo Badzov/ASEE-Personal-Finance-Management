@@ -22,20 +22,24 @@ namespace Pfm.Api.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(PaginatedResult<TransactionDto>), 200)]
+        [ProducesResponseType(typeof(PagedList<TransactionDto>), 200)]
         [ProducesResponseType(typeof(ValidationProblem),400)]
         [ProducesResponseType(typeof(BusinessProblem), 440)]
         public async Task<IActionResult> GetTransactions(
-            [FromQuery] DateTime? startDate,
-            [FromQuery] DateTime? endDate,
             [FromQuery(Name = "kinds")] List<string>? kindStrings,
+            [FromQuery(Name = "start-date")] DateTime? startDate,
+            [FromQuery(Name = "end-date")] DateTime? endDate,
             [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10)
+            [FromQuery(Name = "page-size")] int pageSize = 10,
+            [FromQuery(Name = "sort-by")] string? sortBy = null,
+            [FromQuery(Name = "sort-order")] string? sortOrder = "asc")
         {
             var filters = TransactionFilters.Create(
                 startDate,
                 endDate,
                 kindStrings,
+                sortBy,
+                sortOrder,
                 page,
                 pageSize
             );

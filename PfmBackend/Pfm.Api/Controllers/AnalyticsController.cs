@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Pfm.Api.Models.Problems;
 using Pfm.Application.Common;
+using Pfm.Application.UseCases.Queries;
 using Pfm.Application.UseCases.SpendingAnalytics.Queries;
 
 namespace Pfm.Api.Controllers
@@ -19,18 +20,22 @@ namespace Pfm.Api.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<SpendingAnalysisDto>), 200)]
+        [ProducesResponseType(typeof(SpendingsByCategoryDto), 200)]
         [ProducesResponseType(typeof(ValidationProblem), 400)]
-        public async Task<IActionResult> GetSpendingAnalytics(
-            [FromQuery] string? catcode,
-            [FromQuery] DateTime? startDate,
-            [FromQuery] DateTime? endDate,
-            [FromQuery] string? direction)
+        public async Task<IActionResult> GetSpendingsByCategory(
+            [FromQuery(Name = "cat-code")] string? catCode,
+            [FromQuery(Name = "start-date")] DateTime? startDate,
+            [FromQuery(Name = "end-date")] DateTime? endDate,
+            [FromQuery(Name = "direction")] string? direction)
         {
-            var query = new GetSpendingAnalyticsQuery(catcode, startDate, endDate, direction);
-            var result = await _mediator.Send(query);
-            return Ok(new { groups = result }); // Matches OAS schema
+            var result = await _mediator.Send(new GetSpendingAnalyticsQuery(
+                catCode,
+                startDate,
+                endDate,
+                direction
+            ));
+            return Ok(result);
         }
-            
+
     }
 }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Pfm.Domain.Entities;
+using Pfm.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,14 +10,15 @@ namespace Pfm.Application.UseCases.Transactions.Queries.GetTransactions
 {
     public record TransactionDto(
         string Id,
-        string BeneficiaryName,
+        string? BeneficiaryName,
         DateTime Date,
-        string Direction,
+        DirectionsEnum Direction,
         double Amount,
-        string Description,
+        string? Description,
         string Currency,
-        string Mcc,
-        string Kind,
-        string CatCode
+        MccCodeEnum? Mcc,
+        TransactionKindsEnum Kind,
+        string? CatCode,
+        ICollection<SingleCategorySplitDto>? Splits
     );
 }

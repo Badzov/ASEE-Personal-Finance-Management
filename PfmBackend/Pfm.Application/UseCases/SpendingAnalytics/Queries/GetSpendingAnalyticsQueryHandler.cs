@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using MediatR;
+using Pfm.Application.Common;
+using Pfm.Application.UseCases.Queries;
 using Pfm.Domain.Entities;
 using Pfm.Domain.Enums;
 using Pfm.Domain.Interfaces;
@@ -11,8 +13,7 @@ using System.Threading.Tasks;
 
 namespace Pfm.Application.UseCases.SpendingAnalytics.Queries
 {
-    public class GetSpendingAnalyticsQueryHandler
-    : IRequestHandler<GetSpendingAnalyticsQuery, IEnumerable<SpendingAnalysisDto>>
+    public class GetSpendingAnalyticsQueryHandler : IRequestHandler<GetSpendingAnalyticsQuery, SpendingsByCategoryDto>
     {
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
@@ -23,24 +24,39 @@ namespace Pfm.Application.UseCases.SpendingAnalytics.Queries
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<SpendingAnalysisDto>> Handle(
-            GetSpendingAnalyticsQuery request,
-            CancellationToken cancellationToken)
+        public async Task<SpendingsByCategoryDto> Handle(GetSpendingAnalyticsQuery request, CancellationToken cancellationToken)
         {
-            TransactionDirection? direction = request.Direction switch
+            DirectionsEnum? directionEnum = null;
+            if (!string.IsNullOrEmpty(request.Direction))
             {
-                "d" => TransactionDirection.Debit,
-                "c" => TransactionDirection.Credit,
-                _ => null
-            };
+                directionEnum = request.Direction.ToLower() switch
+                {
+                    "d" => DirectionsEnum.Debit,
+                    "c" => DirectionsEnum.Credit,
+                    _ => throw new ValidationProblemException(
+                        new List<ValidationError>
+                        {
+                            new("direction", "invalid-direction", "Direction must be 'd' or 'c'")
+                        })
+                };
+            }
 
-            var analytics = await _uow.SpendingAnalytics.GetFilteredAsync(
-                request.CatCode,
+            var transactions = await _uow.Transactions.GetFilteredAsync(
                 request.StartDate,
                 request.EndDate,
-                direction);
+                request.CatCode,
+                directionEnum,
+                cancellationToken);
 
-            return _mapper.Map<IEnumerable<SpendingAnalysisDto>>(analytics);
+            var groups = transactions
+                .GroupBy(t => t.CatCode)
+                .Select(g => new SpendingInCategoryDto(
+                    g.Key,
+                    g.Sum(t => t.Amount),
+                    g.Count()))
+                .ToList();
+
+            return new SpendingsByCategoryDto(groups);
         }
     }
 }

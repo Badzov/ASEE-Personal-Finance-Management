@@ -11,24 +11,19 @@ namespace Pfm.Application.UseCases.Transactions.Mappings
         public TransactionProfile()
         {
             CreateMap<Transaction, TransactionDto>()
-                .ForMember(dest => dest.Direction,
-                    opt => opt.MapFrom(src => src.Direction.ToString().ToLower())) 
-                .ForMember(dest => dest.Kind,
-                    opt => opt.MapFrom(src => src.Kind.ToString().ToLower())) 
-                .ForMember(dest => dest.Mcc,
-                    opt => opt.MapFrom(src => src.Mcc.HasValue ? src.Mcc.Value.ToString() : null))
-                .ForMember(dest => dest.CatCode, 
-                    opt => opt.MapFrom(src => src.CatCode));
+                .ForMember(dest => dest.Splits,
+                    opt => opt.MapFrom(src => src.Splits));
 
             CreateMap<ImportTransactionsDto, Transaction>()
+
             .ForMember(dest => dest.Direction,
                 opt => opt.MapFrom(src => src.Direction.ToLower() == "d"
-                    ? TransactionDirection.Debit
-                    : TransactionDirection.Credit))
+                    ? DirectionsEnum.Debit
+                    : DirectionsEnum.Credit))
             .ForMember(dest => dest.Kind,
-                opt => opt.MapFrom(src => Enum.Parse<TransactionKind>(src.Kind, true)))
+                opt => opt.MapFrom(src => Enum.Parse<TransactionKindsEnum>(src.Kind, true)))
             .ForMember(dest => dest.Mcc,
-                opt => opt.MapFrom(src => src.Mcc.HasValue ? (MccCode?)src.Mcc.Value : null))
+                opt => opt.MapFrom(src => src.Mcc.HasValue ? (MccCodeEnum?)src.Mcc.Value : null))
             .ForMember(dest => dest.CatCode,
                 opt => opt.Ignore()); 
         }

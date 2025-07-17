@@ -5,7 +5,9 @@ namespace Pfm.Application.UseCases.Transactions.Queries.GetTransactions
     public record TransactionFilters(
         DateTime? StartDate,
         DateTime? EndDate,
-        IReadOnlyCollection<TransactionKind>? Kinds,
+        IReadOnlyCollection<string>? Kinds,
+        string? SortBy,
+        string? SortOrder,
         int PageNumber = 1,
         int PageSize = 10
     )
@@ -16,20 +18,20 @@ namespace Pfm.Application.UseCases.Transactions.Queries.GetTransactions
         public static TransactionFilters Create(
             DateTime? startDate,
             DateTime? endDate,
-            IEnumerable<string>? kindStrings,
-            int pageNumber = 1,
+            IReadOnlyCollection<string>? kindStrings,
+            string? sortBy,
+            string? sortOrder,
+            int page = 1,
             int pageSize = 10)
         {
-            var kinds = kindStrings?
-                .Select(k => Enum.Parse<TransactionKind>(k, ignoreCase: true))
-                .Distinct()
-                .ToList();
 
             return new TransactionFilters(
                 startDate,
                 endDate,
-                kinds,
-                pageNumber,
+                kindStrings,
+                sortBy,
+                sortOrder,
+                page,
                 pageSize
             );
         }

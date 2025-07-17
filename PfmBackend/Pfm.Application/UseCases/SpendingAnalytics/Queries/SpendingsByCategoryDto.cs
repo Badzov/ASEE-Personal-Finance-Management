@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 
 namespace Pfm.Application.UseCases.SpendingAnalytics.Queries
 {
-    public record SpendingAnalysisDto(
-        string CatCode,
-        double Amount,
-        int Count
+    public record SpendingsByCategoryDto(
+        List<SpendingInCategoryDto> Groups
     );
 }

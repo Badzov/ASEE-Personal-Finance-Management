@@ -12,16 +12,14 @@ namespace Pfm.Infrastructure.Persistence.UnitOfWork
         private readonly PfmDbContext _context;
         public ITransactionRepository Transactions { get; }
         public IRepository<Category> Categories { get; }
-        public IRepository<Split> Splits { get; }
-        public ISpendingAnalysisRepository SpendingAnalytics { get; }
+        public IRepository<SingleCategorySplit> Splits { get; }
 
         public UnitOfWork(PfmDbContext context)
         {
             _context = context;
             Transactions = new TransactionRepository(_context);
             Categories = new Repository<Category>(_context);
-            Splits = new Repository<Split>(_context);
-            SpendingAnalytics = new SpendingAnalysisRepository(_context);
+            Splits = new Repository<SingleCategorySplit>(_context);
         }
 
         public async Task<int> CompleteAsync()

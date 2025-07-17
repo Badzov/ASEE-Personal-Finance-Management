@@ -2,12 +2,13 @@
 using MediatR;
 using Pfm.Application.Common;
 using Pfm.Domain.Common;
+using Pfm.Domain.Enums;
 using Pfm.Domain.Exceptions;
 using Pfm.Domain.Interfaces;
 
 namespace Pfm.Application.UseCases.Transactions.Queries.GetTransactions
 {
-    public class GetTransactionsQueryHandler : IRequestHandler<GetTransactionsQuery, PaginatedResult<TransactionDto>>
+    public class GetTransactionsQueryHandler : IRequestHandler<GetTransactionsQuery, PagedList<TransactionDto>>
     {
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
@@ -18,14 +19,15 @@ namespace Pfm.Application.UseCases.Transactions.Queries.GetTransactions
             _mapper = mapper;
         }
 
-        public async Task<PaginatedResult<TransactionDto>> Handle(GetTransactionsQuery query, CancellationToken cancellationToken)
+        public async Task<PagedList<TransactionDto>> Handle(GetTransactionsQuery query, CancellationToken cancellationToken)
         {
             var validator = new TransactionFiltersValidator();
             var validationResult = await validator.ValidateAsync(query.Filters);
 
             if (!validationResult.IsValid)
             {
-                throw new ValidationProblemException(validationResult.Errors.Select(e => new ValidationError("filters", e.ErrorCode, e.ErrorMessage)).ToList());
+                throw new ValidationProblemException(validationResult.Errors.Select(e =>
+                    new ValidationError("filters", e.ErrorCode, e.ErrorMessage)).ToList());
             }
 
             try
@@ -34,16 +36,23 @@ namespace Pfm.Application.UseCases.Transactions.Queries.GetTransactions
                     query.Filters.StartDate,
                     query.Filters.EndDate,
                     query.Filters.Kinds,
+                    query.Filters.SortBy,
+                    query.Filters.SortOrder,
                     query.Filters.PageNumber,
                     query.Filters.PageSize,
                     cancellationToken
                 );
 
-                return new PaginatedResult<TransactionDto>(
-                    _mapper.Map<List<TransactionDto>>(transactions),
+                var totalPages = (int)Math.Ceiling(totalCount / (double)query.Filters.PageSize);
+
+                return new PagedList<TransactionDto>(
                     totalCount,
+                    query.Filters.PageSize,
                     query.Filters.PageNumber,
-                    query.Filters.PageSize
+                    totalPages,
+                    GetSortOrderEnum(query.Filters.SortOrder),
+                    query.Filters.SortBy ?? "date",
+                    _mapper.Map<List<TransactionDto>>(transactions)
                 );
             }
             catch (Exception ex)
@@ -53,6 +62,12 @@ namespace Pfm.Application.UseCases.Transactions.Queries.GetTransactions
                     "Failed to retrieve transactions",
                     ex.Message);
             }
+        }
+
+        private SortOrderEnum GetSortOrderEnum(string? sortOrder)
+        {
+            if (string.IsNullOrEmpty(sortOrder)) return SortOrderEnum.asc;
+            return sortOrder.ToLower() == "desc" ? SortOrderEnum.desc : SortOrderEnum.asc;
         }
     }
 }

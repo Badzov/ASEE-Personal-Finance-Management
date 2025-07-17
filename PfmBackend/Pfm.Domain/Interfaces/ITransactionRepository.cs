@@ -10,12 +10,21 @@ namespace Pfm.Domain.Interfaces
 {
     public interface ITransactionRepository : IRepository<Transaction>
     {
-        Task<(List<Transaction> Transactions, int TotalCount)> GetFilteredAsync(
+        Task<(IEnumerable<Transaction> Transactions, int TotalCount)> GetFilteredAsync(
             DateTime? startDate,
             DateTime? endDate,
-            IReadOnlyCollection<TransactionKind>? kinds,
+            IReadOnlyCollection<string>? kinds,
+            string? sortBy,
+            string? sortOrder,
             int pageNumber,
             int pageSize,
+            CancellationToken cancellationToken);
+
+        Task<IEnumerable<Transaction>> GetFilteredAsync(
+            DateTime? startDate,
+            DateTime? endDate,
+            string? catCode,
+            DirectionsEnum? direction,
             CancellationToken cancellationToken);
     }
 }

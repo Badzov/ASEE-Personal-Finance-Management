@@ -25,17 +25,17 @@ namespace Pfm.Api.Middleware
 
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            var problem = exception switch
+            var problemResult = exception switch
             {
                 ValidationProblemException valEx => CreateValidationProblem(valEx),
                 BusinessRuleException bizEx => CreateBusinessProblem(bizEx),
-                _ => null 
+                _ => null
             };
 
-            if (problem != null)
+            if (problemResult is (object problem, int statusCode))
             {
                 context.Response.ContentType = "application/json";
-                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                context.Response.StatusCode = statusCode;
                 return context.Response.WriteAsync(JsonSerializer.Serialize(problem));
             }
 

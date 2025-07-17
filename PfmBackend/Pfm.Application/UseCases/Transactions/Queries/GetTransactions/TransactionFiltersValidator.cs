@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Pfm.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,10 +23,41 @@ namespace Pfm.Application.UseCases.Transactions.Queries.GetTransactions
                 .When(x => x.StartDate.HasValue && x.EndDate.HasValue)
                 .WithMessage("End date must be after start date");
 
-            RuleForEach(x => x.Kinds)
-                .IsInEnum()
+            RuleFor(x => x.Kinds)
+                .Must(BeValidTransactionKinds)
                 .When(x => x.Kinds != null)
-                .WithMessage("Invalid transaction kind value");
+                .WithMessage("Invalid transaction kind value(s)");
+
+            RuleFor(x => x.SortBy)
+                .Must(BeAValidSortField)
+                .When(x => !string.IsNullOrEmpty(x.SortBy))
+                .WithMessage("Invalid sort field");
+
+            RuleFor(x => x.SortOrder)
+                .Must(so => so == null || so.ToLower() == "asc" || so.ToLower() == "desc")
+                .WithMessage("Sort order must be 'asc' or 'desc'");
+        }
+
+        private bool BeValidTransactionKinds(IReadOnlyCollection<string>? kindStrings)
+        {
+            if (kindStrings == null) return true;
+
+            foreach (var kind in kindStrings)
+            {
+                if (!Enum.TryParse<TransactionKindsEnum>(kind, ignoreCase: true, out _))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private bool BeAValidSortField(string? sortBy)
+        {
+            if (string.IsNullOrEmpty(sortBy)) return true;
+
+            var validFields = new[] { "date", "amount", "cat-code", "kind", "direction", "beneficiary-name" };
+            return validFields.Contains(sortBy.ToLower());
         }
     }
 }

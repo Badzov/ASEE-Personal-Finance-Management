@@ -5,7 +5,6 @@ using FluentValidation;
 using Pfm.Application.UseCases.Transactions.Commands.CategorizeTransaction;
 using Pfm.Application.UseCases.Transactions.Commands.ImportTransactions;
 using Pfm.Application.UseCases.Categories.Commands.ImportCategories;
-using Pfm.Application.UseCases.SpendingAnalytics.Mappings;
 
 namespace Pfm.Application.DependancyInjection
 {
@@ -16,7 +15,6 @@ namespace Pfm.Application.DependancyInjection
             services.AddAutoMapper(config =>
             {
                 config.AddProfile<TransactionProfile>();
-                config.AddProfile<SpendingAnalysisProfile>();
             });
 
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependancyInjection).Assembly));

@@ -10,33 +10,93 @@ namespace Pfm.Infrastructure.Persistence.Repositories
     {
         public TransactionRepository(PfmDbContext context) : base(context) { }
 
-        public async Task<(List<Transaction>, int)> GetFilteredAsync(
+        public async Task<(IEnumerable<Transaction> Transactions, int TotalCount)> GetFilteredAsync(
             DateTime? startDate,
             DateTime? endDate,
-            IReadOnlyCollection<TransactionKind>? kinds,
+            IReadOnlyCollection<string>? kinds,
+            string? sortBy,
+            string? sortOrder,
             int pageNumber,
             int pageSize,
             CancellationToken cancellationToken)
         {
             var query = _context.Transactions.AsQueryable();
 
-            if (startDate.HasValue) query = query.Where(t => t.Date >= startDate.Value);
-            if (endDate.HasValue) query = query.Where(t => t.Date <= endDate.Value);
-
-            if (kinds?.Count > 0)
+            if (startDate.HasValue)
             {
-                query = query.Where(t => kinds.Contains(t.Kind));
+                query = query.Where(t => t.Date >= startDate.Value);
+            }
+
+            if (endDate.HasValue)
+            {
+                query = query.Where(t => t.Date <= endDate.Value);
+            }
+
+            var kindsEnum = kinds?.Select(k => Enum.Parse<TransactionKindsEnum>(k, ignoreCase: true)).ToList();
+
+            if (kindsEnum?.Any() == true)
+            {
+                query = query.Where(t => kindsEnum.Contains(t.Kind));
+            }
+
+
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                var isDesc = !string.IsNullOrEmpty(sortOrder) && sortOrder.ToLower() == "desc";
+
+                query = sortBy.ToLower() switch
+                {
+                    "amount" => isDesc ? query.OrderByDescending(t => t.Amount) : query.OrderBy(t => t.Amount),
+                    "kind" => isDesc ? query.OrderByDescending(t => t.Kind) : query.OrderBy(t => t.Kind),
+                    "cat-code" => isDesc ? query.OrderByDescending(t => t.CatCode) : query.OrderBy(t => t.CatCode),
+                    "direction" => isDesc ? query.OrderByDescending(t => t.Direction) : query.OrderBy(t => t.Direction),
+                    "beneficiary-name" => isDesc ? query.OrderByDescending(t => t.BeneficiaryName) : query.OrderBy(t => t.BeneficiaryName),
+                    _ => isDesc ? query.OrderByDescending(t => t.Date) : query.OrderBy(t => t.Date) // default sort
+                };
+            }
+            else
+            {
+                query = query.OrderBy(t => t.Date); 
             }
 
             var totalCount = await query.CountAsync(cancellationToken);
 
             var transactions = await query
-                .OrderByDescending(t => t.Date)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
+                .Include(t => t.Category)
+                .Include(t => t.Splits)
                 .ToListAsync(cancellationToken);
 
             return (transactions, totalCount);
+        }
+
+
+        public async Task<IEnumerable<Transaction>> GetFilteredAsync(DateTime? startDate, DateTime? endDate, string? catCode, DirectionsEnum? direction, CancellationToken cancellationToken)
+        {
+            var query = _context.Transactions.AsQueryable();
+
+            if (!string.IsNullOrEmpty(catCode))
+            {
+                query = query.Where(t => t.CatCode.StartsWith(catCode));
+            }
+
+            if (startDate.HasValue)
+            {
+                query = query.Where(t => t.Date >= startDate.Value);
+            }
+
+            if (endDate.HasValue)
+            {
+                query = query.Where(t => t.Date <= endDate.Value);
+            }
+
+            if (direction.HasValue)
+            {
+                query = query.Where(t => t.Direction == direction.Value);
+            }
+
+            return await query.ToListAsync(cancellationToken);
         }
     }
 }

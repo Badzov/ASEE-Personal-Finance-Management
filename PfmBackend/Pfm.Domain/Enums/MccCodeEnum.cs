@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Pfm.Domain.Enums
 {
-    public enum MccCode
+    public enum MccCodeEnum
     {
         M4814 = 4814,
         M4815 = 4815,

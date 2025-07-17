@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Pfm.Domain.Enums
 {
-    public enum TransactionKind
+    public enum TransactionKindsEnum
     {
         dep,        // Deposit  
         wdw,        // Withdrawal  

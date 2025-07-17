@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Pfm.Domain.Enums
 {
-    public enum TransactionDirection
+    public enum SortOrderEnum
     {
-        Debit = 'd',
-        Credit = 'c'
+        asc,
+        desc
     }
 }

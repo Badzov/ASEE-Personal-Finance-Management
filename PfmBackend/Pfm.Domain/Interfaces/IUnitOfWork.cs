@@ -11,8 +11,7 @@ namespace Pfm.Domain.Interfaces
     {
         ITransactionRepository Transactions { get; }
         IRepository<Category> Categories { get; }
-        IRepository<Split> Splits { get; }
-        ISpendingAnalysisRepository SpendingAnalytics { get; }
+        IRepository<SingleCategorySplit> Splits { get; }
         Task<int> CompleteAsync();
     }
 }
