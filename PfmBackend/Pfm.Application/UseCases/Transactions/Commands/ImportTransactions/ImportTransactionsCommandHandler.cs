@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CsvHelper;
 using FluentValidation;
 using MediatR;
 using Pfm.Application.Common;
@@ -6,6 +7,7 @@ using Pfm.Application.Interfaces;
 using Pfm.Domain.Entities;
 using Pfm.Domain.Exceptions;
 using Pfm.Domain.Interfaces;
+using System.Text;
 
 
 namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
@@ -15,26 +17,39 @@ namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly ITransactionsCsvParser _csvParser;
-        private readonly IValidator<ImportTransactionsDto> _validator;
+        private readonly IValidator<ImportTransactionsDto> _dtoValidator;
+        private readonly IValidator<ImportTransactionsCommand> _commandValidator;
 
         public ImportTransactionsCommandHandler(
             IUnitOfWork uow,
             IMapper mapper,
             ITransactionsCsvParser csvParser,
-            IValidator<ImportTransactionsDto> validator)
+            IValidator<ImportTransactionsDto> dtoValidator,
+            IValidator<ImportTransactionsCommand> commandValidator)
         {
             _uow = uow;
             _mapper = mapper;
             _csvParser = csvParser;
-            _validator = validator;
+            _dtoValidator = dtoValidator;
+            _commandValidator = commandValidator;
         }
 
-        public async Task<Unit> Handle(
-            ImportTransactionsCommand request,
-            CancellationToken ct)
+        public async Task<Unit> Handle(ImportTransactionsCommand request, CancellationToken ct)
         {
+
+            // 0. Validate the command
+            var commandValidation = await _commandValidator.ValidateAsync(request, ct);
+            if (!commandValidation.IsValid)
+            {
+                throw new ValidationProblemException(
+                    commandValidation.Errors.Select(e =>
+                        new ValidationError("file", e.ErrorCode, e.ErrorMessage))
+                );
+            }
+
             // 1. Parse CSV with basic validation
-            var parseResult = await _csvParser.ParseAsync(request.CsvStream);
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(request.CsvContent));
+            var parseResult = await _csvParser.ParseAsync(stream);
 
             // Short-circuit if CSV parsing failed
             if (parseResult.HasErrors)
@@ -49,7 +64,7 @@ namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
             foreach (var record in parseResult.ValidRecords)
             {
                 // DTO validation
-                var validationResult = await _validator.ValidateAsync(record, ct);
+                var validationResult = await _dtoValidator.ValidateAsync(record, ct);
                 if (!validationResult.IsValid)
                 {
                     validationErrors.AddRange(validationResult.Errors.Select(e =>

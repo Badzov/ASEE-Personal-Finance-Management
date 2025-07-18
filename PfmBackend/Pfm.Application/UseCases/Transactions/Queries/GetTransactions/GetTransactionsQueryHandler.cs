@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using FluentValidation;
 using MediatR;
 using Pfm.Application.Common;
+using Pfm.Application.UseCases.Transactions.Commands.ImportTransactions;
 using Pfm.Domain.Common;
 using Pfm.Domain.Enums;
 using Pfm.Domain.Exceptions;
@@ -12,17 +14,18 @@ namespace Pfm.Application.UseCases.Transactions.Queries.GetTransactions
     {
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
+        private readonly IValidator<TransactionFilters> _filtersValidator;
 
-        public GetTransactionsQueryHandler(IUnitOfWork uow, IMapper mapper)
+        public GetTransactionsQueryHandler(IUnitOfWork uow, IMapper mapper, IValidator<TransactionFilters> filtersValidator)
         {
             _uow = uow;
             _mapper = mapper;
+            _filtersValidator = filtersValidator;
         }
 
         public async Task<PagedList<TransactionDto>> Handle(GetTransactionsQuery query, CancellationToken cancellationToken)
         {
-            var validator = new TransactionFiltersValidator();
-            var validationResult = await validator.ValidateAsync(query.Filters);
+            var validationResult = await _filtersValidator.ValidateAsync(query.Filters);
 
             if (!validationResult.IsValid)
             {

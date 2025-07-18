@@ -18,8 +18,8 @@ namespace Pfm.Application.UseCases.Transactions.Mappings
 
             .ForMember(dest => dest.Direction,
                 opt => opt.MapFrom(src => src.Direction.ToLower() == "d"
-                    ? DirectionsEnum.Debit
-                    : DirectionsEnum.Credit))
+                    ? DirectionsEnum.d
+                    : DirectionsEnum.c))
             .ForMember(dest => dest.Kind,
                 opt => opt.MapFrom(src => Enum.Parse<TransactionKindsEnum>(src.Kind, true)))
             .ForMember(dest => dest.Mcc,

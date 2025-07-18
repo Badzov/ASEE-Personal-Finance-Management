@@ -8,7 +8,7 @@ namespace Pfm.Domain.Enums
 {
     public enum SortOrderEnum
     {
-        asc,
-        desc
+        asc,        // Ascending
+        desc        // Descending
     }
 }

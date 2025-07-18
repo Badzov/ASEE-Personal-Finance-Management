@@ -28,6 +28,16 @@ namespace Pfm.Api.Controllers
             [FromQuery(Name = "end-date")] DateTime? endDate,
             [FromQuery(Name = "direction")] string? direction)
         {
+
+            // This part is somewhat interesting, the start and end dates with small integer values silently turn into null, so here, we turn them into junk 
+            // so our validator can handle and not just let it pass as a null
+
+            if (Request.Query.ContainsKey("start-date") && !startDate.HasValue)
+                startDate = DateTime.MinValue; // junk date 
+
+            if (Request.Query.ContainsKey("end-date") && !endDate.HasValue)
+                endDate = DateTime.MinValue; // junk date
+
             var result = await _mediator.Send(new GetSpendingAnalyticsQuery(
                 catCode,
                 startDate,

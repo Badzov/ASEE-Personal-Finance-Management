@@ -1,4 +1,5 @@
 ﻿using Pfm.Api.Models.Problems;
+using Pfm.Api.Serialization;
 using Pfm.Application.Common;
 using Pfm.Domain.Exceptions;
 using Pfm.Infrastructure.Exceptions;
@@ -48,7 +49,8 @@ namespace Pfm.Api.Middleware
 
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = response.StatusCode;
-            await context.Response.WriteAsync(JsonSerializer.Serialize(response.Problem));
+
+            await context.Response.WriteAsync(JsonSerializer.Serialize(response.Problem, JsonSerializationOptions.Default));
         }
 
 

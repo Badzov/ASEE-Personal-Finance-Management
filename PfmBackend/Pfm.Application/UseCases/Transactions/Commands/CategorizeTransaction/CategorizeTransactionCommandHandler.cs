@@ -11,12 +11,12 @@ namespace Pfm.Application.UseCases.Transactions.Commands.CategorizeTransaction
     {
         private readonly IUnitOfWork _uow;
         private readonly ILogger<CategorizeTransactionCommandHandler> _logger;
-        private readonly IValidator<TransactionCategoryDto> _validator;
+        private readonly IValidator<CategorizeTransactionCommand> _validator;
 
         public CategorizeTransactionCommandHandler(
             IUnitOfWork uow,
             ILogger<CategorizeTransactionCommandHandler> logger,
-            IValidator<TransactionCategoryDto> validator)
+            IValidator<CategorizeTransactionCommand> validator)
         {
             _uow = uow;
             _logger = logger;
@@ -27,15 +27,14 @@ namespace Pfm.Application.UseCases.Transactions.Commands.CategorizeTransaction
             CategorizeTransactionCommand request,
             CancellationToken ct)
         {
-            // Validate DTO
-            var validationResult = await _validator.ValidateAsync(
-                new TransactionCategoryDto(request.CategoryCode), ct);
+            // Validate the command
+            var validationResult = await _validator.ValidateAsync(request, ct);
 
             if (!validationResult.IsValid)
             {
                 throw new ValidationProblemException(
                     validationResult.Errors.Select(e =>
-                        new ValidationError("category", e.ErrorCode, e.ErrorMessage)));
+                        new ValidationError("command", e.ErrorCode, e.ErrorMessage)));
             }
 
             // Check existence

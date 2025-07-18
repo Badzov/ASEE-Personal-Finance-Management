@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using FluentValidation;
+﻿using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Pfm.Application.Common;
@@ -15,18 +14,21 @@ namespace Pfm.Application.UseCases.Categories.Commands.ImportCategories
     {
         private readonly IUnitOfWork _uow;
         private readonly ICategoriesCsvParser _parser;
-        private readonly IValidator<ImportCategoriesDto> _validator;
+        private readonly IValidator<ImportCategoriesDto> _dtoValidator;
+        private readonly IValidator<ImportCategoriesCommand> _commandValidator;
         private readonly ILogger<ImportCategoriesCommandHandler> _logger;
 
         public ImportCategoriesCommandHandler(
             IUnitOfWork uow,
             ICategoriesCsvParser parser,
-            IValidator<ImportCategoriesDto> validator,
+            IValidator<ImportCategoriesDto> dtoValidator,
+            IValidator<ImportCategoriesCommand> commandValidator,
             ILogger<ImportCategoriesCommandHandler> logger)
         {
             _uow = uow;
             _parser = parser;
-            _validator = validator;
+            _dtoValidator = dtoValidator;
+            _commandValidator = commandValidator;
             _logger = logger;
         }
 
@@ -34,11 +36,11 @@ namespace Pfm.Application.UseCases.Categories.Commands.ImportCategories
         {
             // 0. Command validation
 
-            if (string.IsNullOrEmpty(command.CsvContent))
+            var commandValidationResult = await _commandValidator.ValidateAsync(command, ct);
+            if (!commandValidationResult.IsValid)
             {
-                throw new ValidationProblemException(new List<ValidationError> {
-                    new("csv-content", "required", "CSV content is required")
-                });
+                throw new ValidationProblemException(commandValidationResult.Errors.Select(e =>
+                    new ValidationError("csv-content", e.ErrorCode, e.ErrorMessage)).ToList());
             }
 
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(command.CsvContent));
@@ -62,10 +64,10 @@ namespace Pfm.Application.UseCases.Categories.Commands.ImportCategories
             foreach (var record in parseResult.ValidRecords)
             {
                 // DTO validation
-                var validationResult = await _validator.ValidateAsync(record, ct);
-                if (!validationResult.IsValid)
+                var dtoValidationResult = await _dtoValidator.ValidateAsync(record, ct);
+                if (!dtoValidationResult.IsValid)
                 {
-                    validationErrors.AddRange(validationResult.Errors.Select(e =>
+                    validationErrors.AddRange(dtoValidationResult.Errors.Select(e =>
                         new ValidationError(record.Code, e.ErrorCode, e.ErrorMessage)));
                     continue;
                 }

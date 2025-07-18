@@ -13,36 +13,42 @@ namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
         public ImportTransactionsDtoValidator()
         {
             RuleFor(x => x.Id)
-                .NotEmpty().WithMessage("Transaction ID is required")
-                .Length(1, 8).WithMessage("Transaction ID must be up to 8 characters");
-
-            RuleFor(x => x.BeneficiaryName)
-                .MaximumLength(50).WithMessage("Beneficiary name must be up to 50 characters");
+                .NotEmpty().WithErrorCode("required").WithMessage("Transaction ID required")
+                .MaximumLength(8).WithErrorCode("max-length").WithMessage("Transaction ID must be max 8 characters");
 
             RuleFor(x => x.Date)
-                .NotEmpty().WithMessage("Date is required")
-                .LessThanOrEqualTo(DateTime.Today).WithMessage("Date cannot be in the future");
+                .NotEmpty().WithErrorCode("required").WithMessage("Date required")
+                .LessThanOrEqualTo(DateTime.Today).WithErrorCode("future-date").WithMessage("Date cannot be future");
 
             RuleFor(x => x.Direction)
-                .IsInEnum().WithMessage("Invalid transaction direction");
+                .Must(x => Enum.TryParse<DirectionsEnum>(x, out _))
+                .WithErrorCode("invalid-direction")
+                .WithMessage("Direction must be 'd' (debit) or 'c' (credit)");
 
             RuleFor(x => x.Amount)
-                .NotEmpty().WithMessage("Amount is required");
-
-            RuleFor(x => x.Description)
-                .MaximumLength(100).WithMessage("Description must be up to 100 characters");
+                .NotEmpty().WithErrorCode("required").WithMessage("Amount required");
 
             RuleFor(x => x.Currency)
-                .NotEmpty().WithMessage("Currency is required")
-                .Length(3).WithMessage("Currency must be 3 characters")
-                .Matches(@"^[A-Z]{3}$").WithMessage("Invalid ISO currency code");
+                .NotEmpty().WithErrorCode("required").WithMessage("Currency required")
+                .Length(3).WithErrorCode("invalid-length").WithMessage("Must be 3 characters")
+                .Matches(@"^[A-Z]{3}$").WithErrorCode("invalid-format").WithMessage("Currency must be ISO currency code");
+
+            // Optional fields
+            RuleFor(x => x.BeneficiaryName)
+                .MaximumLength(50).WithErrorCode("max-length").WithMessage("Beneficiary Name can have max 50 characters");
+
+            RuleFor(x => x.Description)
+                .MaximumLength(100).WithErrorCode("max-length").WithMessage("Description can have max 100 characters");
 
             RuleFor(x => x.Mcc)
-                .IsInEnum().WithMessage("Invalid MCC code") 
-                .When(x => x.Mcc.HasValue);
+                .Must(x => !x.HasValue || Enum.IsDefined(typeof(MccCodeEnum), x.Value))
+                .WithErrorCode("invalid-mcc")
+                .WithMessage("Invalid MCC code");
 
             RuleFor(x => x.Kind)
-                .IsInEnum().WithMessage("Invalid transaction kind");
+                .Must(x => Enum.TryParse<TransactionKindsEnum>(x, ignoreCase: true, out _))
+                .WithErrorCode("invalid-kind")
+                .WithMessage("Invalid transaction kind");
         }
     }
 }

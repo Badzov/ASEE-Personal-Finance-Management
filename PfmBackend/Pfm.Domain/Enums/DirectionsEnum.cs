@@ -8,7 +8,7 @@ namespace Pfm.Domain.Enums
 {
     public enum DirectionsEnum
     {
-        Debit = 'd',
-        Credit = 'c'
+        d,      // Debit
+        c       // Credit
     }
 }

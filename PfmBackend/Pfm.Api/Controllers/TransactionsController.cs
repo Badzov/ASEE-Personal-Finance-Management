@@ -56,8 +56,7 @@ namespace Pfm.Api.Controllers
         [ProducesResponseType(typeof(BusinessProblem), 440)]
         public async Task<IActionResult> ImportTransactions([FromBody] string csvContent)
         {
-            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(csvContent));
-            await _mediator.Send(new ImportTransactionsCommand(stream));
+            await _mediator.Send(new ImportTransactionsCommand(csvContent));
             return Ok();
         }
 
