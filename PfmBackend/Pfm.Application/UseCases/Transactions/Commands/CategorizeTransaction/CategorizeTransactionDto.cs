@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Pfm.Application.UseCases.Transactions.Commands.CategorizeTransaction
 {
-    public record TransactionCategoryDto(
+    public record CategorizeTransactionDto(
         string CategoryCode
     );
 }

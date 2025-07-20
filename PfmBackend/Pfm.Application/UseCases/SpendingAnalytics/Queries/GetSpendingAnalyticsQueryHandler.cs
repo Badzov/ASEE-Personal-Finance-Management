@@ -32,8 +32,6 @@ namespace Pfm.Application.UseCases.SpendingAnalytics.Queries
 
         public async Task<SpendingsByCategoryDto> Handle(GetSpendingAnalyticsQuery request, CancellationToken cancellationToken)
         {
-            Console.WriteLine(">>>>>>>>>>>" + request.StartDate);
-
             var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
             if (!validationResult.IsValid)
@@ -59,15 +57,56 @@ namespace Pfm.Application.UseCases.SpendingAnalytics.Queries
                 directionEnum,
                 cancellationToken);
 
-            var groups = transactions
-                .GroupBy(t => t.CatCode)
-                .Select(g => new SpendingInCategoryDto(
-                    g.Key,
-                    g.Sum(t => t.Amount),
-                    g.Count()))
+            var categorySpendings = new Dictionary<string, (double Amount, int Count)>();
+
+            const string nullCategoryKey = "UNCATEGORIZED";
+            categorySpendings[nullCategoryKey] = (0, 0);
+
+            foreach (var transaction in transactions)
+            {
+                if (transaction.CatCode == "SPLIT" && transaction.Splits?.Count > 0)
+                {
+                    foreach (var split in transaction.Splits)
+                    {
+                        if (categorySpendings.ContainsKey(split.CatCode))
+                        {
+                            categorySpendings[split.CatCode] = (
+                                categorySpendings[split.CatCode].Amount + split.Amount,
+                                categorySpendings[split.CatCode].Count + 1
+                            );
+                        }
+                        else
+                        {
+                            categorySpendings[split.CatCode] = (split.Amount, 1);
+                        }
+                    }
+                }
+                else
+                {
+                    var categoryKey = transaction.CatCode ?? nullCategoryKey;
+                    if (categorySpendings.ContainsKey(categoryKey))
+                    {
+                        categorySpendings[categoryKey] = (
+                            categorySpendings[categoryKey].Amount + transaction.Amount,
+                            categorySpendings[categoryKey].Count + 1
+                        );
+                    }
+                    else
+                    {
+                        categorySpendings[categoryKey] = (transaction.Amount, 1);
+                    }
+                }
+            }
+
+            var result = categorySpendings
+                .Where(kvp => kvp.Value.Count > 0) // Only include categories with transactions
+                .Select(kvp => new SpendingInCategoryDto(
+                    kvp.Key == nullCategoryKey ? null : kvp.Key,
+                    kvp.Value.Amount,
+                 kvp.Value.Count))
                 .ToList();
 
-            return new SpendingsByCategoryDto(groups);
+            return new SpendingsByCategoryDto(result);
         }
     }
 }

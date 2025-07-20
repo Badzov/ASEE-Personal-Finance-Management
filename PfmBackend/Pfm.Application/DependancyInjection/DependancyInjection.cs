@@ -7,6 +7,7 @@ using Pfm.Application.UseCases.Transactions.Commands.ImportTransactions;
 using Pfm.Application.UseCases.Categories.Commands.ImportCategories;
 using Pfm.Application.UseCases.Queries;
 using Pfm.Application.UseCases.Transactions.Queries.GetTransactions;
+using Pfm.Application.UseCases.Transactions.Commands.SplitTransaction;
 
 namespace Pfm.Application.DependancyInjection
 {
@@ -28,6 +29,7 @@ namespace Pfm.Application.DependancyInjection
             services.AddScoped<IValidator<GetSpendingAnalyticsQuery>, GetSpendingAnalyticsQueryValidator>();
             services.AddScoped<IValidator<ImportTransactionsCommand>, ImportTransactionsCommandValidator>();
             services.AddScoped<IValidator<TransactionFilters>, TransactionFiltersValidator>();
+            services.AddScoped<IValidator<SplitTransactionCommand>, SplitTransactionCommandValidator>();
             return services;
         }
     }

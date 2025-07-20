@@ -26,5 +26,7 @@ namespace Pfm.Domain.Interfaces
             string? catCode,
             DirectionsEnum? direction,
             CancellationToken cancellationToken);
+
+        Task<Transaction> GetByIdWithSplitsAsync(string id);
     }
 }

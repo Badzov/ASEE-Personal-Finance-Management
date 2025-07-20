@@ -7,6 +7,7 @@ using Pfm.Application.UseCases.Transactions.Queries.GetTransactions;
 using System.Text;
 using Pfm.Application.UseCases.Transactions.Commands.CategorizeTransaction;
 using Pfm.Api.Models.Problems;
+using Pfm.Application.UseCases.Transactions.Commands.SplitTransaction;
 
 namespace Pfm.Api.Controllers
 {
@@ -66,12 +67,23 @@ namespace Pfm.Api.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(typeof(ValidationProblem), 400)]
         [ProducesResponseType(typeof(BusinessProblem), 440)]
-        public async Task<IActionResult> CategorizeTransaction([FromRoute] string id, [FromBody] TransactionCategoryDto dto)
+        public async Task<IActionResult> CategorizeTransaction([FromRoute] string id, [FromBody] CategorizeTransactionDto dto)
         {
             await _mediator.Send(new CategorizeTransactionCommand(id, dto.CategoryCode));
             return Ok();
         }
-            
+
+        [HttpPost("{id}/split")]
+        [Consumes("application/json")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(ValidationProblem), 400)]
+        [ProducesResponseType(typeof(BusinessProblem), 440)]
+        public async Task<IActionResult> SplitTransaction([FromRoute] string id, [FromBody] List<SplitTransactionDto> splits)
+        {
+            await _mediator.Send(new SplitTransactionCommand(id, splits));
+            return Ok();
+        }
+
     }
 }
 

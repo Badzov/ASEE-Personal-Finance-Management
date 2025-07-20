@@ -8,7 +8,11 @@ namespace Pfm.Api.Serialization
         public static JsonSerializerOptions Default => new()
         {
             PropertyNamingPolicy = new KebabCaseNamingPolicy(),
-            Converters = { new JsonStringEnumConverter() },
+            Converters =
+            {
+                new JsonStringEnumConverter(), 
+                new MccCodeEnumConverter()     
+            },
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
     }

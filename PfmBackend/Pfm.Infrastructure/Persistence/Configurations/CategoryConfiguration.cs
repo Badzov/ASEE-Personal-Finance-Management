@@ -14,7 +14,7 @@ namespace Pfm.Infrastructure.Persistence.Configurations
         public void Configure(EntityTypeBuilder<Category> builder)
         {
             builder.HasKey(c => c.Code);
-            builder.Property(c => c.Code).HasMaxLength(4).IsRequired();
+            builder.Property(c => c.Code).HasMaxLength(5).IsRequired();
             builder.Property(c => c.Name).HasMaxLength(50).IsRequired();
             builder.Property(c => c.ParentCode).HasMaxLength(4);
 
@@ -22,6 +22,10 @@ namespace Pfm.Infrastructure.Persistence.Configurations
                 .WithOne(c => c.Parent)
                 .HasForeignKey(c => c.ParentCode)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasData(
+                new Category("SPLIT", "Split Transaction", null) 
+            );
         }
     }
 }

@@ -36,7 +36,9 @@ builder.Services
     .AddJsonOptions(json =>
     {
         json.JsonSerializerOptions.PropertyNamingPolicy = new KebabCaseNamingPolicy();
-        json.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        json.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        json.JsonSerializerOptions.Converters.Add(new MccCodeEnumConverter()); 
+        json.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); 
     });
 
 var app = builder.Build();

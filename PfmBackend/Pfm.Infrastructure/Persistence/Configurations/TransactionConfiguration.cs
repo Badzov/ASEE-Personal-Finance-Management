@@ -19,8 +19,9 @@ namespace Pfm.Infrastructure.Persistence.Configurations
             builder.Property(t => t.CatCode).HasMaxLength(4);
 
             builder.HasOne(t => t.Category)
-                .WithMany()
-                .HasForeignKey(t => t.CatCode);
+              .WithMany(c => c.Transactions)
+              .HasForeignKey(t => t.CatCode)  
+              .HasPrincipalKey(c => c.Code);
         }
     }
 }

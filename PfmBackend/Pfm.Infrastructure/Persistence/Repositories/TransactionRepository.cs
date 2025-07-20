@@ -2,6 +2,7 @@
 using Pfm.Domain.Entities;
 using Pfm.Domain.Enums;
 using Pfm.Domain.Interfaces;
+using Pfm.Infrastructure.Exceptions;
 using Pfm.Infrastructure.Persistence.DbContexts;
 
 namespace Pfm.Infrastructure.Persistence.Repositories
@@ -20,7 +21,9 @@ namespace Pfm.Infrastructure.Persistence.Repositories
             int pageSize,
             CancellationToken cancellationToken)
         {
-            var query = _context.Transactions.AsQueryable();
+            var query = _context.Transactions
+                .Include(t => t.Splits)  
+                .AsQueryable();
 
             if (startDate.HasValue)
             {
@@ -74,7 +77,9 @@ namespace Pfm.Infrastructure.Persistence.Repositories
 
         public async Task<IEnumerable<Transaction>> GetFilteredAsync(DateTime? startDate, DateTime? endDate, string? catCode, DirectionsEnum? direction, CancellationToken cancellationToken)
         {
-            var query = _context.Transactions.AsQueryable();
+            var query = _context.Transactions
+                .Include(t => t.Splits)
+                .AsQueryable();
 
             if (!string.IsNullOrEmpty(catCode))
             {
@@ -97,6 +102,14 @@ namespace Pfm.Infrastructure.Persistence.Repositories
             }
 
             return await query.ToListAsync(cancellationToken);
+        }
+
+        public async Task<Transaction> GetByIdWithSplitsAsync(string id)
+        {
+            return await _context.Transactions
+                .Include(t => t.Splits)  
+                .FirstOrDefaultAsync(t => t.Id == id)
+                ?? throw new RecordNotFoundException("Transaction", id);
         }
     }
 }

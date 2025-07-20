@@ -34,6 +34,29 @@ namespace Pfm.Domain.Entities
             if (Mcc.HasValue && !Enum.IsDefined(typeof(MccCodeEnum), Mcc.Value))
                 throw new BusinessRuleException("invalid-mcc", $"Invalid MCC code: {Mcc.Value}");
         }
+
+        public void ValidateSplit(IEnumerable<SingleCategorySplit> splits)
+        {
+            if (splits == null || !splits.Any())
+            {
+                throw new BusinessRuleException("empty-splits", "At least one split is required");
+            }
+
+            var totalSplitAmount = splits.Sum(s => s.Amount);
+            if (Math.Abs(totalSplitAmount - Amount) > 0.001)
+            {
+                throw new BusinessRuleException("split-amount-mismatch",
+                    $"Sum of split amounts ({totalSplitAmount}) must equal transaction amount ({Amount})");
+            }
+
+            if (CatCode != "SPLIT")
+            {
+                throw new BusinessRuleException(
+                    "invalid-split-state",
+                    "Original transaction category must be cleared when splitting"
+                );
+            }
+        }
     }
 
 }

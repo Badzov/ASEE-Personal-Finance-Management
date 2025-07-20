@@ -10,6 +10,8 @@ namespace Pfm.Application.UseCases.Transactions.Mappings
     {
         public TransactionProfile()
         {
+            CreateMap<SingleCategorySplit, SingleCategorySplitDto>();
+
             CreateMap<Transaction, TransactionDto>()
                 .ForMember(dest => dest.Splits,
                     opt => opt.MapFrom(src => src.Splits));

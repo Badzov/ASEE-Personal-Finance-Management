@@ -11,15 +11,15 @@ namespace Pfm.Infrastructure.Persistence.UnitOfWork
     {
         private readonly PfmDbContext _context;
         public ITransactionRepository Transactions { get; }
-        public IRepository<Category> Categories { get; }
-        public IRepository<SingleCategorySplit> Splits { get; }
+        public ICategoryRepository Categories { get; }
+        public ISplitRepository Splits { get; }
 
         public UnitOfWork(PfmDbContext context)
         {
             _context = context;
             Transactions = new TransactionRepository(_context);
-            Categories = new Repository<Category>(_context);
-            Splits = new Repository<SingleCategorySplit>(_context);
+            Categories = new CategoryRepository(_context);
+            Splits = new SplitRepository(_context);
         }
 
         public async Task<int> CompleteAsync()
