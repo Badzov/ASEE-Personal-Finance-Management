@@ -7,6 +7,7 @@ using Pfm.Api.Serialization;
 using System.Text.Json.Serialization;
 using Pfm.Api.Swagger;
 using Microsoft.AspNetCore.Mvc;
+using Pfm.Api.Filters;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +22,7 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddInfrastructure();
 builder.Services.AddApplicationServices();
+builder.Services.AddDomainServices();
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
@@ -32,11 +34,11 @@ builder.Services
     .AddControllers(options =>
     {
         options.InputFormatters.Insert(0, new TextPlainInputFormatter());
+        options.Filters.Add<ModelValidationFilter>();
     })
     .AddJsonOptions(json =>
     {
         json.JsonSerializerOptions.PropertyNamingPolicy = new KebabCaseNamingPolicy();
-        json.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         json.JsonSerializerOptions.Converters.Add(new MccCodeEnumConverter()); 
         json.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); 
     });

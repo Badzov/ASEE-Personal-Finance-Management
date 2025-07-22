@@ -14,7 +14,12 @@ namespace Pfm.Application.UseCases.Transactions.Mappings
 
             CreateMap<Transaction, TransactionDto>()
                 .ForMember(dest => dest.Splits,
-                    opt => opt.MapFrom(src => src.Splits));
+                    opt => opt.MapFrom(src => src.Splits))
+                .ForMember(dest => dest.CatCode, opt =>
+                {
+                     opt.MapFrom(src => src.CatCode); 
+                     opt.NullSubstitute(null);        
+                });
 
             CreateMap<ImportTransactionsDto, Transaction>()
 

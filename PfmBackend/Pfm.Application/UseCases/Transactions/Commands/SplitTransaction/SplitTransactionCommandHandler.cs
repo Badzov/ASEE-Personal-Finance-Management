@@ -32,7 +32,7 @@ namespace Pfm.Application.UseCases.Transactions.Commands.SplitTransaction
                 throw new ValidationProblemException(
                     validationResult.Errors.Select(e =>
                         new ValidationError(
-                            e.PropertyName,
+                            e.PropertyName.ToLower(),
                             e.ErrorCode,
                             e.ErrorMessage
                         )
@@ -58,8 +58,6 @@ namespace Pfm.Application.UseCases.Transactions.Commands.SplitTransaction
                     $"Categories not found: {string.Join(", ", missingCategories)}");
             }
 
-            //Mark the transaction category code as SPLIT
-            transaction.CatCode = "SPLIT";
 
             // Map DTOs to domain models
             var splits = request.Splits.Select(s => new SingleCategorySplit

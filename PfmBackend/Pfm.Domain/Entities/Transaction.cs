@@ -49,13 +49,6 @@ namespace Pfm.Domain.Entities
                     $"Sum of split amounts ({totalSplitAmount}) must equal transaction amount ({Amount})");
             }
 
-            if (CatCode != "SPLIT")
-            {
-                throw new BusinessRuleException(
-                    "invalid-split-state",
-                    "Original transaction category must be cleared when splitting"
-                );
-            }
         }
     }
 

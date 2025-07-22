@@ -23,9 +23,6 @@ namespace Pfm.Infrastructure.Persistence.Configurations
                 .HasForeignKey(c => c.ParentCode)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasData(
-                new Category("SPLIT", "Split Transaction", null) 
-            );
         }
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Pfm.Infrastructure.Persistence.DbContexts;
 
@@ -11,9 +12,11 @@ using Pfm.Infrastructure.Persistence.DbContexts;
 namespace Pfm.Infrastructure.Migrations
 {
     [DbContext(typeof(PfmDbContext))]
-    partial class PfmDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250722171424_RemoveSplitCategoryMarker")]
+    partial class RemoveSplitCategoryMarker
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,8 +44,14 @@ namespace Pfm.Infrastructure.Migrations
 
                     b.HasIndex("ParentCode");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
 
+                    b.HasData(
+                        new
+                        {
+                            Code = "SPLIT",
+                            Name = "Split Transaction"
+                        });
                 });
 
             modelBuilder.Entity("Pfm.Domain.Entities.SingleCategorySplit", b =>
@@ -72,7 +81,7 @@ namespace Pfm.Infrastructure.Migrations
 
                     b.HasIndex("TransactionId");
 
-                    b.ToTable("Splits", (string)null);
+                    b.ToTable("Splits");
                 });
 
             modelBuilder.Entity("Pfm.Domain.Entities.Transaction", b =>
@@ -117,7 +126,7 @@ namespace Pfm.Infrastructure.Migrations
 
                     b.HasIndex("CatCode");
 
-                    b.ToTable("Transactions", (string)null);
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("Pfm.Domain.Entities.Category", b =>
