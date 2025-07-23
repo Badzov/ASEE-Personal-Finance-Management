@@ -18,6 +18,11 @@ namespace Pfm.Application.UseCases.Transactions.Queries.GetTransactions
             RuleFor(x => x.PageSize)
                 .InclusiveBetween(1, 100).WithMessage("Page size must be between 1 and 100");
 
+            RuleFor(x => x.StartDate)
+                .LessThanOrEqualTo(DateTime.Today)
+                .When(x => x.StartDate.HasValue)
+                .WithMessage("Start date cannot be in the future");
+
             RuleFor(x => x.EndDate)
                 .GreaterThanOrEqualTo(x => x.StartDate)
                 .When(x => x.StartDate.HasValue && x.EndDate.HasValue)

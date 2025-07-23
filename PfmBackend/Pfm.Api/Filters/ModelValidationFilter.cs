@@ -11,22 +11,18 @@ namespace Pfm.Api.Filters
 {
     public sealed class ModelValidationFilter : IAsyncActionFilter
     {
-        public async Task OnActionExecutionAsync(
-            ActionExecutingContext context,
-            ActionExecutionDelegate next)
+        public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            if (!context.ModelState.IsValid)
-            {
-                var errors = context.ModelState
-                    .Where(e => e.Value?.Errors.Count > 0)
-                    .SelectMany(e => e.Value!.Errors
-                        .Select(error => new ValidationError(
-                            CleanKey(e.Key),
-                            "invalid-format",
-                            error.ErrorMessage)));
+            var modelErrors = context.ModelState
+            .Where(e => e.Value?.Errors.Count > 0)
+            .SelectMany(e => e.Value!.Errors.Select(error => new ValidationError(
+                CleanKey(e.Key),
+                "ModelBinding",
+                error.ErrorMessage)))
+            .ToList();
 
-                throw new ValidationProblemException(errors);
-            }
+            // Temporarily store errors in HttpContext so you can access them in your handler
+            context.HttpContext.Items["ModelValidationErrors"] = modelErrors;
 
             await next();
         }

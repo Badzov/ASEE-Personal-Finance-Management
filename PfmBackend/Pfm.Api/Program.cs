@@ -20,6 +20,8 @@ builder.Services.AddSwaggerGen(c =>
     c.OperationFilter<DefaultProblemResponseFilter>();
 });
 
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddInfrastructure();
 builder.Services.AddApplicationServices();
 builder.Services.AddDomainServices();

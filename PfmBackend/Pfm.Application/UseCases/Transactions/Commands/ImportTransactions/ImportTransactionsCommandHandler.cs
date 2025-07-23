@@ -83,7 +83,13 @@ namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
                 catch (BusinessRuleException ex)
                 {
                     throw ex;
+                } 
+                
+                catch(Exception ex)
+                {
+                    validationErrors.Add(new ValidationError(record.Id, "mapping-failed", ex.Message));
                 }
+                
             }
 
             if (validationErrors.Any())

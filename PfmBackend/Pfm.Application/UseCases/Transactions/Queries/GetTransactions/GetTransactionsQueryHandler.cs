@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Pfm.Application.Common;
-using Pfm.Application.UseCases.Transactions.Commands.ImportTransactions;
 using Pfm.Domain.Common;
 using Pfm.Domain.Enums;
 using Pfm.Domain.Exceptions;
 using Pfm.Domain.Interfaces;
+using System.Text.RegularExpressions;
 
 namespace Pfm.Application.UseCases.Transactions.Queries.GetTransactions
 {
@@ -15,23 +16,33 @@ namespace Pfm.Application.UseCases.Transactions.Queries.GetTransactions
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly IValidator<TransactionFilters> _filtersValidator;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public GetTransactionsQueryHandler(IUnitOfWork uow, IMapper mapper, IValidator<TransactionFilters> filtersValidator)
+        public GetTransactionsQueryHandler(IUnitOfWork uow, IMapper mapper, IValidator<TransactionFilters> filtersValidator, IHttpContextAccessor httpContextAccessor)
         {
             _uow = uow;
             _mapper = mapper;
             _filtersValidator = filtersValidator;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<PagedList<TransactionDto>> Handle(GetTransactionsQuery query, CancellationToken cancellationToken)
         {
             var validationResult = await _filtersValidator.ValidateAsync(query.Filters);
 
-            if (!validationResult.IsValid)
-            {
-                throw new ValidationProblemException(validationResult.Errors.Select(e =>
-                    new ValidationError("filters", e.ErrorCode, e.ErrorMessage)).ToList());
-            }
+            var fluentErrors = validationResult.Errors
+                .Select(e => new ValidationError(
+                    Regex.Replace(e.PropertyName, "(?<!^)([A-Z])", "-$1").ToLower(),
+                    e.ErrorCode,
+                    e.ErrorMessage))
+                .ToList();
+
+            var modelErrors = _httpContextAccessor.HttpContext.Items["ModelValidationErrors"] as List<ValidationError> ?? new();
+
+            var allErrors = modelErrors.Concat(fluentErrors).ToList();
+
+            if (allErrors.Any())
+                throw new ValidationProblemException(allErrors);
 
             try
             {

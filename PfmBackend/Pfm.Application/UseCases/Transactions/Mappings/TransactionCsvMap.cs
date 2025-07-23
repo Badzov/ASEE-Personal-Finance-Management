@@ -3,6 +3,7 @@ using CsvHelper.TypeConversion;
 using CsvHelper;
 using System.Globalization;
 using Pfm.Application.UseCases.Transactions.Commands.ImportTransactions;
+using Pfm.Application.Common;
 
 namespace Pfm.Application.UseCases.Transactions.Mappings
 {
@@ -43,9 +44,22 @@ namespace Pfm.Application.UseCases.Transactions.Mappings
 
     public class DateTimeConverter : DefaultTypeConverter
     {
+        private static readonly string[] formats = new[]
+        {
+            "M/d/yyyy",
+            "yyyy-MM-ddTHH:mm:ss"
+        };
+
         public override object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData)
         {
-            return DateTime.ParseExact(text, "M/d/yyyy", CultureInfo.InvariantCulture);
+            try
+            {
+                return DateTime.ParseExact(text, formats, CultureInfo.InvariantCulture, DateTimeStyles.None);
+            }
+            catch (FormatException ex)
+            {
+                throw new Exception($"Invalid date format: '{text}'. Supported formats: {string.Join(", ", formats)}");
+            }
         }
     }
 }
