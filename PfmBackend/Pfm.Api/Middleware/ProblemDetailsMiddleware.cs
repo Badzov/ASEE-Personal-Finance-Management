@@ -80,14 +80,12 @@ namespace Pfm.Api.Middleware
                 Status = exception switch
                 {
                     ConcurrentUpdateException => StatusCodes.Status409Conflict,
-                    RecordNotFoundException => StatusCodes.Status404NotFound,
                     _ => StatusCodes.Status500InternalServerError
                 },
                 Details = exception.Message
             }, exception switch
             {
                 ConcurrentUpdateException => StatusCodes.Status409Conflict,
-                RecordNotFoundException => StatusCodes.Status404NotFound,
                 _ => StatusCodes.Status500InternalServerError
             });
         }

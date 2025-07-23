@@ -4,6 +4,7 @@ using Pfm.Application.Common;
 using Pfm.Domain.Entities;
 using Pfm.Domain.Exceptions;
 using Pfm.Domain.Interfaces;
+using System.Text.RegularExpressions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +33,10 @@ namespace Pfm.Application.UseCases.Transactions.Commands.SplitTransaction
                 throw new ValidationProblemException(
                     validationResult.Errors.Select(e =>
                         new ValidationError(
-                            e.PropertyName.ToLower(),
+                            Regex.Replace(e.PropertyName, @"(?<=[a-z0-9])([A-Z])|[.]", match => {
+                                if (match.Value == ".") return "-";
+                                return "-" + match.Value;
+                            }).ToLower(),
                             e.ErrorCode,
                             e.ErrorMessage
                         )

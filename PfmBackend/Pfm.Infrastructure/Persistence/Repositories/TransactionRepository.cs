@@ -106,10 +106,7 @@ namespace Pfm.Infrastructure.Persistence.Repositories
 
         public async Task<Transaction> GetByIdWithSplitsAsync(string id)
         {
-            return await _context.Transactions
-                .Include(t => t.Splits)  
-                .FirstOrDefaultAsync(t => t.Id == id)
-                ?? throw new RecordNotFoundException("Transaction", id);
+            return await _context.Transactions.Include(t => t.Splits).FirstOrDefaultAsync(t => t.Id == id);
         }
     }
 }

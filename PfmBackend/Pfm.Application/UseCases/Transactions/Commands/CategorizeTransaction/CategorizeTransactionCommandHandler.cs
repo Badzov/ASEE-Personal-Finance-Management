@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Pfm.Application.Common;
 using Pfm.Domain.Exceptions;
 using Pfm.Domain.Interfaces;
+using System.Text.RegularExpressions;
 
 namespace Pfm.Application.UseCases.Transactions.Commands.CategorizeTransaction
 {
@@ -34,7 +35,7 @@ namespace Pfm.Application.UseCases.Transactions.Commands.CategorizeTransaction
             {
                 throw new ValidationProblemException(
                     validationResult.Errors.Select(e =>
-                        new ValidationError("command", e.ErrorCode, e.ErrorMessage)));
+                        new ValidationError(Regex.Replace(e.PropertyName, "(?<!^)([A-Z])", "-$1").ToLower(), e.ErrorCode, e.ErrorMessage)));
             }
 
             // Check existence

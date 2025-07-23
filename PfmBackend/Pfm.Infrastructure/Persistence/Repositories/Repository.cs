@@ -52,7 +52,7 @@ namespace Pfm.Infrastructure.Persistence.Repositories
         public async Task<T> GetByIdAsync(string id)
         {
             var entity = await _context.Set<T>().FindAsync(id);
-            return entity ?? throw new RecordNotFoundException(_entityName, id);
+            return entity;
         }
         public async Task UpdateAsync(T entity)
         {

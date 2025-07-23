@@ -69,7 +69,7 @@ namespace Pfm.Api.Controllers
         [ProducesResponseType(typeof(BusinessProblem), 440)]
         public async Task<IActionResult> CategorizeTransaction([FromRoute] string id, [FromBody] CategorizeTransactionDto dto)
         {
-            await _mediator.Send(new CategorizeTransactionCommand(id, dto.CategoryCode));
+            await _mediator.Send(new CategorizeTransactionCommand(id, dto?.CategoryCode));
             return Ok();
         }
 
