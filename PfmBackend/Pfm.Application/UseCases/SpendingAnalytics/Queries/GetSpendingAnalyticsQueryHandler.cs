@@ -1,18 +1,12 @@
-﻿using AutoMapper;
-using FluentValidation;
+﻿using FluentValidation;
 using MediatR;
 using Pfm.Application.Common;
 using Pfm.Application.UseCases.Queries;
 using Pfm.Domain.Entities;
 using Pfm.Domain.Enums;
-using Pfm.Domain.Interfaces;
+using Pfm.Application.Interfaces;
 using Pfm.Domain.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Pfm.Application.UseCases.SpendingAnalytics.Queries
 {

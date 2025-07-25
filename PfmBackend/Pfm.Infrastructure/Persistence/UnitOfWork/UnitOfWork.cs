@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Pfm.Domain.Entities;
-using Pfm.Domain.Interfaces;
+using Pfm.Application.Interfaces;
 using Pfm.Infrastructure.Exceptions;
 using Pfm.Infrastructure.Persistence.DbContexts;
 using Pfm.Infrastructure.Persistence.Repositories;

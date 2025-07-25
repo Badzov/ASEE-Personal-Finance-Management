@@ -1,12 +1,8 @@
-﻿using Pfm.Domain.Entities;
+﻿using Microsoft.Data.SqlClient;
+using Pfm.Domain.Entities;
 using Pfm.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Pfm.Domain.Interfaces
+namespace Pfm.Application.Interfaces
 {
     public interface ITransactionRepository : IRepository<Transaction>
     {
@@ -28,5 +24,9 @@ namespace Pfm.Domain.Interfaces
             CancellationToken cancellationToken);
 
         Task<Transaction> GetByIdWithSplitsAsync(string id);
+
+        Task<int> CountUncategorizedAsync(CancellationToken ct);
+
+        Task<int> ExecuteUpdateAsync(string sql, List<SqlParameter> parameters);
     }
 }

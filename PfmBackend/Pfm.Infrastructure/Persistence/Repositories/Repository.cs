@@ -1,10 +1,4 @@
-﻿using Pfm.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Pfm.Domain.Entities;
+﻿using Pfm.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Pfm.Infrastructure.Exceptions;
 using System.Data.SqlClient;

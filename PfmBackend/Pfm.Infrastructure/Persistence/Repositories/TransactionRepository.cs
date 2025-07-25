@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Pfm.Domain.Entities;
 using Pfm.Domain.Enums;
-using Pfm.Domain.Interfaces;
-using Pfm.Infrastructure.Exceptions;
+using Pfm.Application.Interfaces;
 using Pfm.Infrastructure.Persistence.DbContexts;
+using Microsoft.Data.SqlClient;
+using Pfm.Domain.Exceptions;
+using Pfm.Infrastructure.Exceptions;
 
 namespace Pfm.Infrastructure.Persistence.Repositories
 {
@@ -107,6 +109,29 @@ namespace Pfm.Infrastructure.Persistence.Repositories
         public async Task<Transaction> GetByIdWithSplitsAsync(string id)
         {
             return await _context.Transactions.Include(t => t.Splits).FirstOrDefaultAsync(t => t.Id == id);
+        }
+
+        public async Task<int> CountUncategorizedAsync(CancellationToken ct)
+        {
+            return await _context.Transactions
+                .Where(t => t.CatCode == null)
+                .CountAsync(ct);
+        }
+
+        public async Task<int> ExecuteUpdateAsync(string sql, List<SqlParameter> parameters)
+        {
+            try
+            {
+                return await _context.Database.ExecuteSqlRawAsync(sql, parameters.ToArray());
+            }
+            catch (SqlException ex) when (ex.Number == 547) // FK violation
+            {
+                throw new BusinessRuleException("invalid-category", "Invalid category code specified in rules");
+            }
+            catch (Exception ex)
+            {
+                throw new PersistenceException("update-failed", ex.Message);
+            }
         }
     }
 }

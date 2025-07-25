@@ -6,7 +6,7 @@ using Pfm.Application.Common;
 using Pfm.Domain.Common;
 using Pfm.Domain.Enums;
 using Pfm.Domain.Exceptions;
-using Pfm.Domain.Interfaces;
+using Pfm.Application.Interfaces;
 using System.Text.RegularExpressions;
 
 namespace Pfm.Application.UseCases.Transactions.Queries.GetTransactions

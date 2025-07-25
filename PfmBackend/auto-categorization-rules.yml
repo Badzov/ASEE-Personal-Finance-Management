@@ -1,0 +1,76 @@
+rules:
+
+  - id: "rule-1"
+    title: "Gas Stations"
+    catCode: "4"
+    predicate: "beneficiary-name LIKE '%chevron%' OR beneficiary-name LIKE '%shell%'"
+  
+  - id: "rule-2"
+    title: "Restaurants"
+    catCode: "39"
+    predicate: "mcc = 5811"
+
+  - id: "rule-3"
+    title: "Groceries"
+    catCode: "38"
+    predicate: "beneficiary-name LIKE '%lidl%' OR beneficiary-name LIKE '%delhaize%' OR mcc = 5499 OR mcc = 5200"
+
+  - id: "rule-4"
+    title: "Parking"
+    catCode: "5"
+    predicate: "beneficiary-name LIKE '%parking%' OR mcc = 7523"
+
+  - id: "rule-5"
+    title: "Insurance"
+    catCode: "48"
+    predicate: "beneficiary-name LIKE '%generali%' OR beneficiary-name LIKE '%metlife%' OR mcc = 6300 OR mcc = 6381"
+
+  - id: "rule-6"
+    title: "Utilities"
+    catCode: "13"
+    predicate: "beneficiary-name LIKE '%heating%' OR beneficiary-name LIKE '%electro%' OR description LIKE '%utilities%'"
+
+  - id: "rule-7"
+    title: "Education"
+    catCode: "17"
+    predicate: "beneficiary-name LIKE '%faculty%' OR beneficiary-name LIKE '%school%' OR mcc = 8299"
+
+  - id: "rule-8"
+    title: "Health & Fitness"
+    catCode: "47"
+    predicate: "beneficiary-name LIKE '%fit%' OR beneficiary-name LIKE '%gym%' OR mcc = 8050 OR mcc = 8011"
+
+  - id: "rule-9"
+    title: "Transportation"
+    catCode: "105"
+    predicate: "beneficiary-name LIKE '%hertz%' OR beneficiary-name LIKE '%taxi%' OR mcc = 7519"
+
+  - id: "rule-10"
+    title: "Charity"
+    catCode: "41"
+    predicate: "beneficiary-name LIKE '%red cross%' OR beneficiary-name LIKE '%charity%'"
+
+  - id: "rule-11"
+    title: "Home Services"
+    catCode: "55"
+    predicate: "beneficiary-name LIKE '%cleaning%' OR description LIKE '%cleaning%'"
+
+  - id: "rule-12"
+    title: "Pets"
+    catCode: "84"
+    predicate: "beneficiary-name LIKE '%pet%' OR mcc = 5995"
+
+  - id: "rule-13"
+    title: "Taxes"
+    catCode: "96"
+    predicate: "description LIKE '%tax%' OR mcc = 9311"
+
+  - id: "rule-14"
+    title: "Subscriptions"
+    catCode: "23"
+    predicate: "beneficiary-name LIKE '%netflix%' OR beneficiary-name LIKE '%spotify%' OR mcc = 5733 OR mcc = 5192"
+
+  - id: "rule-15"
+    title: "Shopping"
+    catCode: "P"
+    predicate: "mcc = 5941 OR mcc = 5945 OR mcc = 5947 OR mcc = 5712"

@@ -8,6 +8,8 @@ using System.Text;
 using Pfm.Application.UseCases.Transactions.Commands.CategorizeTransaction;
 using Pfm.Api.Models.Problems;
 using Pfm.Application.UseCases.Transactions.Commands.SplitTransaction;
+using Pfm.Application.UseCases.Transactions.Commands.AutoCategorizeTransactions;
+using Pfm.Application.Interfaces;
 
 namespace Pfm.Api.Controllers
 {
@@ -82,6 +84,22 @@ namespace Pfm.Api.Controllers
         {
             await _mediator.Send(new SplitTransactionCommand(id, splits));
             return Ok();
+        }
+
+        [HttpPost("auto-categorize")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(ValidationProblem), 400)]
+        [ProducesResponseType(typeof(BusinessProblem), 440)]
+        public async Task<IActionResult> AutoCategorize()
+        {
+            var result = await _mediator.Send(new AutoCategorizeTransactionsCommand());
+            return Ok(result);
+        }
+
+        [HttpGet("debug/rules")]
+        public IActionResult DebugRules([FromServices] IRulesProvider provider)
+        {
+            return Ok(provider.GetRules());
         }
 
     }

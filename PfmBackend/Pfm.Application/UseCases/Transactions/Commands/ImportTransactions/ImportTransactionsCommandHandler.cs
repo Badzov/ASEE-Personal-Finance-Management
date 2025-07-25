@@ -1,12 +1,10 @@
 ﻿using AutoMapper;
-using CsvHelper;
 using FluentValidation;
 using MediatR;
 using Pfm.Application.Common;
 using Pfm.Application.Interfaces;
 using Pfm.Domain.Entities;
 using Pfm.Domain.Exceptions;
-using Pfm.Domain.Interfaces;
 using System.Text;
 
 

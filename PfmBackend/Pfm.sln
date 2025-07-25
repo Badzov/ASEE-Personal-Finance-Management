@@ -3,21 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pfm.Api", "Pfm.Api\Pfm.Api.csproj", "{050BDDF5-02D0-4306-A3BE-9A9FAB2CE5FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pfm.Api", "Pfm.Api\Pfm.Api.csproj", "{050BDDF5-02D0-4306-A3BE-9A9FAB2CE5FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pfm.Domain", "Pfm.Domain\Pfm.Domain.csproj", "{71E1F0FA-1F3C-4CE7-8C26-7D1272A20A49}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pfm.Domain", "Pfm.Domain\Pfm.Domain.csproj", "{71E1F0FA-1F3C-4CE7-8C26-7D1272A20A49}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pfm.Application", "Pfm.Application\Pfm.Application.csproj", "{04BB5656-D3BB-424E-BA26-B064B8A064B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pfm.Application", "Pfm.Application\Pfm.Application.csproj", "{04BB5656-D3BB-424E-BA26-B064B8A064B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pfm.Infrastructure", "Pfm.Infrastructure\Pfm.Infrastructure.csproj", "{01682E6D-6095-4941-A176-C24976DB87EC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pfm.Infrastructure", "Pfm.Infrastructure\Pfm.Infrastructure.csproj", "{01682E6D-6095-4941-A176-C24976DB87EC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{8629E17B-6E79-4DE3-9C47-F8E8FB11954C}"
+	ProjectSection(SolutionItems) = preProject
+		auto-categorization-rules.yml = auto-categorization-rules.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{050BDDF5-02D0-4306-A3BE-9A9FAB2CE5FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -36,5 +38,11 @@ Global
 		{01682E6D-6095-4941-A176-C24976DB87EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{01682E6D-6095-4941-A176-C24976DB87EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{01682E6D-6095-4941-A176-C24976DB87EC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CE529D7D-F9F0-4153-A0EB-4F691E4DDE27}
 	EndGlobalSection
 EndGlobal

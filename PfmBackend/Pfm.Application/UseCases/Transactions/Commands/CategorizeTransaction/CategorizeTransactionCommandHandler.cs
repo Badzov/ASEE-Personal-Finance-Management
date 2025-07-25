@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Pfm.Application.Common;
 using Pfm.Domain.Exceptions;
-using Pfm.Domain.Interfaces;
+using Pfm.Application.Interfaces;
 using System.Text.RegularExpressions;
 
 namespace Pfm.Application.UseCases.Transactions.Commands.CategorizeTransaction
