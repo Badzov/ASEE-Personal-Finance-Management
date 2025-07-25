@@ -17,7 +17,11 @@ namespace Pfm.Infrastructure.Services
             {
                 using var reader = new StreamReader(csvStream);
                 using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
-                csv.Context.RegisterClassMap<TransactionCsvMap>();
+
+                csv.Context.RegisterClassMap(new TransactionCsvMap((tag, code, message) =>
+                {
+                    result.AddError(tag, code, message);
+                }));
 
                 await foreach (var record in csv.GetRecordsAsync<ImportTransactionsDto>())
                 {
@@ -34,11 +38,11 @@ namespace Pfm.Infrastructure.Services
             }
             catch (CsvHelperException ex)
             {
-                result.AddError("file", "invalid-csv", ex.Message);
+                result.AddError("csv", "invalid-csv", ex.Message);
             }
             catch (Exception ex)
             {
-                result.AddError("file", "processing-error", $"Error processing CSV: {ex.Message}");
+                result.AddError("csv", "processing-error", $"Error processing CSV: {ex.Message}");
             }
 
             return result;

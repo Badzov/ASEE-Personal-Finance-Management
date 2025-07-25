@@ -24,32 +24,31 @@ namespace Pfm.Infrastructure.Services
                     TrimOptions = TrimOptions.Trim
                 });
 
-                csv.Context.RegisterClassMap<CategoryCsvMap>();
-
-                while (await csv.ReadAsync())
+                csv.Context.RegisterClassMap(new CategoryCsvMap((tag, code, message) =>
                 {
-                    try
+                    result.AddError(tag, code, message);
+                }));
+
+                await foreach (var record in csv.GetRecordsAsync<ImportCategoriesDto>())
+                {
+                    var recordId = record.Code ?? "unknown";
+
+                    if (string.IsNullOrWhiteSpace(record.Code))
                     {
-                        var record = csv.GetRecord<ImportCategoriesDto>();
-                        result.AddValidRecord(record);
+                        result.AddError(recordId, "required", "Category code is required");
+                        continue;
                     }
-                    catch (CsvHelperException ex)
-                    {
-                        result.AddError(
-                            csv.GetField("code") ?? "unknown",
-                            "csv-parse-error",
-                            ex.Message
-                        );
-                    }
+
+                    result.AddValidRecord(record);
                 }
             }
             catch (Exception ex) when (ex is HeaderValidationException || ex is ReaderException)
             {
-                result.AddError("file", "invalid-file", "Invalid CSV format");
+                result.AddError("csv", "invalid-csv", "Invalid CSV format");
             }
             catch (Exception ex)
             {
-                result.AddError("file", "processing-error", $"Error processing CSV: {ex.Message}");
+                result.AddError("csv", "processing-error", $"Error processing CSV: {ex.Message}");
             }
 
             return result;

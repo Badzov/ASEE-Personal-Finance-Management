@@ -31,8 +31,6 @@ namespace Pfm.Domain.Entities
                 throw new BusinessRuleException("invalid-amount", "Transaction amount must be positive");
             }
 
-            if (Mcc.HasValue && !Enum.IsDefined(typeof(MccCodeEnum), Mcc.Value))
-                throw new BusinessRuleException("invalid-mcc", $"Invalid MCC code: {Mcc.Value}");
         }
 
         public void ValidateSplit(IEnumerable<SingleCategorySplit> splits)

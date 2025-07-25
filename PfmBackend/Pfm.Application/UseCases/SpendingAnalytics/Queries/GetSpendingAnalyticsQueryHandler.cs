@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Pfm.Application.UseCases.SpendingAnalytics.Queries
@@ -48,7 +49,7 @@ namespace Pfm.Application.UseCases.SpendingAnalytics.Queries
             {
                 throw new ValidationProblemException(validationResult.Errors.Select(e =>
                     new ValidationError(
-                        e.PropertyName.ToLower(),
+                        Regex.Replace(e.PropertyName, "(?<!^)([A-Z])", "-$1").ToLower(),
                         e.ErrorCode,
                         e.ErrorMessage)).ToList());
             }

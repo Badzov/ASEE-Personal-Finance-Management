@@ -25,6 +25,9 @@ namespace Pfm.Application.UseCases.Queries
 
 
             RuleFor(x => x.StartDate)
+                .Must(date => date != DateTime.MinValue)
+                    .WithErrorCode("invalid-date")
+                    .WithMessage("Invalid date formatting")
                 .Must(date => !date.HasValue || date.Value.Year >= 2000)
                     .WithErrorCode("invalid-date")
                     .WithMessage("Start date must be from year 2000 onwards")

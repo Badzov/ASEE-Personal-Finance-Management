@@ -13,11 +13,11 @@ namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
         public ImportTransactionsDtoValidator()
         {
             RuleFor(x => x.Id)
-                .NotEmpty().WithErrorCode("required").WithMessage("Transaction ID required")
-                .MaximumLength(8).WithErrorCode("max-length").WithMessage("Transaction ID must be max 8 characters");
+                .NotEmpty().WithErrorCode("id-required").WithMessage("Transaction ID required")
+                .MaximumLength(8).WithErrorCode("id-length").WithMessage("Transaction ID must be max 8 characters");
 
             RuleFor(x => x.Date)
-                .NotEmpty().WithErrorCode("required").WithMessage("Date required")
+                .NotEmpty().WithErrorCode("date-required").WithMessage("Date required")
                 .LessThanOrEqualTo(DateTime.Today).WithErrorCode("future-date").WithMessage("Date cannot be future");
 
             RuleFor(x => x.Direction)
@@ -26,19 +26,19 @@ namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
                 .WithMessage("Direction must be 'd' (debit) or 'c' (credit)");
 
             RuleFor(x => x.Amount)
-                .NotEmpty().WithErrorCode("required").WithMessage("Amount required");
+                .NotEmpty().WithErrorCode("amount-required").WithMessage("Amount required");
 
             RuleFor(x => x.Currency)
-                .NotEmpty().WithErrorCode("required").WithMessage("Currency required")
-                .Length(3).WithErrorCode("invalid-length").WithMessage("Must be 3 characters")
-                .Matches(@"^[A-Z]{3}$").WithErrorCode("invalid-format").WithMessage("Currency must be ISO currency code");
+                .NotEmpty().WithErrorCode("currency-required").WithMessage("Currency required")
+                .Length(3).WithErrorCode("currency-length").WithMessage("Must be 3 characters")
+                .Matches(@"^[A-Z]{3}$").WithErrorCode("currecny-format").WithMessage("Currency must be ISO currency code");
 
             // Optional fields
             RuleFor(x => x.BeneficiaryName)
-                .MaximumLength(50).WithErrorCode("max-length").WithMessage("Beneficiary Name can have max 50 characters");
+                .MaximumLength(50).WithErrorCode("name-length").WithMessage("Beneficiary Name can have max 50 characters");
 
             RuleFor(x => x.Description)
-                .MaximumLength(100).WithErrorCode("max-length").WithMessage("Description can have max 100 characters");
+                .MaximumLength(100).WithErrorCode("desc-length").WithMessage("Description can have max 100 characters");
 
             RuleFor(x => x.Mcc)
                 .Must(x => !x.HasValue || Enum.IsDefined(typeof(MccCodeEnum), x.Value))

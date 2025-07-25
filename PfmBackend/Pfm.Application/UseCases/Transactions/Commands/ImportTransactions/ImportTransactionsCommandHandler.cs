@@ -37,17 +37,17 @@ namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
         public async Task<Unit> Handle(ImportTransactionsCommand request, CancellationToken ct)
         {
 
-            // 0. Validate the command
+            // 1. Validate the command
             var commandValidation = await _commandValidator.ValidateAsync(request, ct);
             if (!commandValidation.IsValid)
             {
                 throw new ValidationProblemException(
                     commandValidation.Errors.Select(e =>
-                        new ValidationError("file", e.ErrorCode, e.ErrorMessage))
+                        new ValidationError("csv", e.ErrorCode, e.ErrorMessage))
                 );
             }
 
-            // 1. Parse CSV with basic validation
+            // 2. Parse CSV with basic validation
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(request.CsvContent));
             var parseResult = await _csvParser.ParseAsync(stream);
 
@@ -61,6 +61,9 @@ namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
             var validationErrors = new List<ValidationError>();
             var validTransactions = new List<Transaction>();
 
+            // HashSet for checking if a Transaction has already appeared (by id)
+            var seenTransactionIds = new HashSet<string>();
+
             foreach (var record in parseResult.ValidRecords)
             {
                 // DTO validation
@@ -72,8 +75,14 @@ namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
                     continue;
                 }
 
+                // Business validation
                 try
                 {
+                    if (!seenTransactionIds.Add(record.Id))
+                    {
+                        throw new BusinessRuleException("duplicate-transaction", $"Duplicate transaction ID found: {record.Id}");
+                    }
+
                     var transaction = _mapper.Map<Transaction>(record);
                     transaction.Validate();
                     validTransactions.Add(transaction);

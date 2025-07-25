@@ -40,7 +40,7 @@ namespace Pfm.Application.UseCases.Categories.Commands.ImportCategories
             if (!commandValidationResult.IsValid)
             {
                 throw new ValidationProblemException(commandValidationResult.Errors.Select(e =>
-                    new ValidationError("csv-content", e.ErrorCode, e.ErrorMessage)).ToList());
+                    new ValidationError("csv", e.ErrorCode, e.ErrorMessage)).ToList());
             }
 
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(command.CsvContent));
