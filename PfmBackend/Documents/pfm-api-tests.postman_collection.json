@@ -1,0 +1,2463 @@
+{
+	"info": {
+		"_postman_id": "a78e962b-9b6c-4b0f-8521-55a9ec301914",
+		"name": "PFM API Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "41995148"
+	},
+	"item": [
+		{
+			"name": "Setup",
+			"item": [
+				{
+					"name": "Import Categories",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Status code check\r",
+									"pm.test(\"Status code is 200\", function() {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"// Store categories for later use\r",
+									"const categories = [\"F\", \"G\", \"T\", \"E\", \"U\", \"X\", \"Y\"];\r",
+									"pm.collectionVariables.set(\"category_codes\", categories);\r",
+									"pm.collectionVariables.set(\"parent_category\", \"F\");\r",
+									"pm.collectionVariables.set(\"child_category\", \"G\")\r",
+									"pm.collectionVariables.set(\"empty_parent\", \"T\");\r",
+									"pm.collectionVariables.set(\"category_code\", categories[5]);\r",
+									"pm.collectionVariables.set(\"category_code_2\", categories[6]);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/csv",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "code,parent-code,name\r\nF,,Food\r\nG,F,Groceries\r\nT,,Transport\r\nE,,Entertainment\r\nU,,Utilities\r\nX,,/\r\nY,,/",
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/categories/import",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"import"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Import and Categorize Transactions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Status code check\r",
+									"pm.test(\"Status code is 200\", function() {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Store transaction IDs and amount for later use\r",
+									"const transactionIds = [\"1\", \"2\", \"3\"];\r",
+									"pm.collectionVariables.set(\"transaction_ids\", transactionIds);\r",
+									"pm.collectionVariables.set(\"transaction_id\", transactionIds[2]);\r",
+									"pm.collectionVariables.set(\"transaction_amount\", \"2000\");\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/csv",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "id,beneficiary-name,date,direction,amount,description,currency,mcc,kind\r\n1,Supermarket,2023-01-15T09:30:00,d,50,Grocery shopping,USD,5411,pmt\r\n2,Restaurant,2023-01-16T19:45:00,d,30,Dinner out,USD,5812,pmt\r\n3,Salary,2023-01-31T00:00:00,c,2000.00,Monthly salary,USD,,dep",
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/transactions/import",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"transactions",
+								"import"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Categorize Transaction Parent",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const ids = pm.variables.get(\"transaction_ids\");\r",
+									"pm.variables.set(\"first_transaction_id\", ids[0]);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Status code check\r",
+									"pm.test(\"Status code is 200\", function() {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"category-code\": \"{{parent_category}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/transactions/{{first_transaction_id}}/categorize",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"transactions",
+								"{{first_transaction_id}}",
+								"categorize"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Categorize Transaction Child",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const ids = pm.variables.get(\"transaction_ids\");\r",
+									"pm.variables.set(\"second_transaction_id\", ids[1]);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Status code check\r",
+									"pm.test(\"Status code is 200\", function() {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"category-code\": \"{{child_category}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/transactions/2/categorize",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"transactions",
+								"2",
+								"categorize"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Transactions",
+			"item": [
+				{
+					"name": "Get Transactions",
+					"item": [
+						{
+							"name": "Happy Path: Default",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 200\", function() {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"// Schema validation\r",
+											"const schema = {\r",
+											"    type: \"object\",\r",
+											"    properties: {\r",
+											"        \"total-count\": { type: \"number\" },\r",
+											"        \"page-size\": { type: \"number\" },\r",
+											"        \"page\": { type: \"number\" },\r",
+											"        \"total-pages\": { type: \"number\" },\r",
+											"        \"sort-order\": { enum: [\"asc\", \"desc\"] },\r",
+											"        \"sort-by\": { type: [\"string\", \"null\"] },\r",
+											"        \"items\": {\r",
+											"            type: \"array\",\r",
+											"            items: {\r",
+											"                type: \"object\",\r",
+											"                properties: {\r",
+											"                    id: { type: \"string\" },\r",
+											"                    \"beneficiary-name\": { type: [\"string\", \"null\"] },\r",
+											"                    date: { \r",
+											"                        type: \"string\",\r",
+											"                        pattern: \"^\\\\d{4}-\\\\d{2}-\\\\d{2}T\\\\d{2}:\\\\d{2}:\\\\d{2}\"\r",
+											"                    },\r",
+											"                    direction: { enum: [\"d\", \"c\"] },\r",
+											"                    amount: { type: \"number\" },\r",
+											"                    description: { type: [\"string\", \"null\"] },\r",
+											"                    currency: { type: [\"string\", \"null\"] },\r",
+											"                    mcc: { type: [\"number\", \"null\"] },\r",
+											"                    kind: { \r",
+											"                        enum: [\"dep\", \"wdw\", \"pmt\", \"fee\", \"inc\", \"rev\", \"adj\", \r",
+											"                               \"lnd\", \"lnr\", \"fcx\", \"aop\", \"acl\", \"spl\", \"sal\"]\r",
+											"                    },\r",
+											"                    \"cat-code\": { type: [\"string\", \"null\"] },\r",
+											"                    splits: {\r",
+											"                        type: \"array\",\r",
+											"                        items: {\r",
+											"                            type: \"object\",\r",
+											"                            properties: {\r",
+											"                                \"cat-code\": { type: [\"string\", \"null\"] },\r",
+											"                                amount: { type: \"number\" }\r",
+											"                            },\r",
+											"                            required: [\"amount\"],\r",
+											"                            additionalProperties: false\r",
+											"                        }\r",
+											"                    }\r",
+											"                },\r",
+											"                required: [\"id\", \"date\", \"direction\", \"amount\", \"kind\"],\r",
+											"                additionalProperties: false\r",
+											"            }\r",
+											"        }\r",
+											"    },\r",
+											"    required: [\"total-count\", \"page-size\", \"page\", \"total-pages\", \"items\"],\r",
+											"    additionalProperties: false\r",
+											"};\r",
+											"\r",
+											"pm.test(\"Response matches schema\", function() {\r",
+											"    pm.response.to.have.jsonSchema(schema);\r",
+											"});\r",
+											"\r",
+											"// Verify default pagination\r",
+											"pm.test(\"Uses default pagination values\", () => {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.page).to.equal(1);\r",
+											"    pm.expect(jsonData['page-size']).to.equal(10);\r",
+											"    pm.expect(jsonData['total-pages']).to.equal(Math.ceil(jsonData['total-count'] / jsonData['page-size']));\r",
+											"});\r",
+											"\r",
+											"// Default sorting test\r",
+											"pm.test(\"Uses default sorting (date asc)\", () => {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData['sort-by']).to.equal('date');\r",
+											"    pm.expect(jsonData['sort-order']).to.equal('asc');\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/transactions",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"transactions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Happy Path: Filters",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 200 for filtered request\", () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"// Verify applied filters\r",
+											"pm.test(\"Correctly applies pagination parameters\", () => {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.page).to.equal(1);\r",
+											"    pm.expect(jsonData['page-size']).to.equal(5);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Filters by date range\", () => {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    jsonData.items.forEach(item => {\r",
+											"        const txDate = new Date(item.date);\r",
+											"        pm.expect(txDate).to.be.at.least(new Date('2023-01-01'));\r",
+											"        pm.expect(txDate).to.be.below(new Date('2023-02-01'));\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Filters by transaction kinds\", () => {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    const allowedKinds = ['pmt', 'dep'];\r",
+											"    jsonData.items.forEach(item => {\r",
+											"        pm.expect(allowedKinds).to.include(item.kind);\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Applies custom sorting\", () => {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData['sort-by']).to.equal('amount');\r",
+											"    pm.expect(jsonData['sort-order']).to.equal('desc');\r",
+											"    \r",
+											"    // Verify amounts are in descending order\r",
+											"    for (let i = 0; i < jsonData.items.length - 1; i++) {\r",
+											"        pm.expect(jsonData.items[i].amount)\r",
+											"          .to.be.at.least(jsonData.items[i+1].amount);\r",
+											"    }\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/transactions?page=1&page-size=5&start-date=2023-01-01&end-date=2023-01-31&kinds=pmt,dep&sort-by=amount&sort-order=desc",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"transactions"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "page-size",
+											"value": "5"
+										},
+										{
+											"key": "start-date",
+											"value": "2023-01-01"
+										},
+										{
+											"key": "end-date",
+											"value": "2023-01-31"
+										},
+										{
+											"key": "kinds",
+											"value": "pmt,dep"
+										},
+										{
+											"key": "sort-by",
+											"value": "amount"
+										},
+										{
+											"key": "sort-order",
+											"value": "desc"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Validation Errors: Invalid Field Formatting",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 400 for multiple validation errors\", () => {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"// Verify error response structure\r",
+											"pm.test(\"Returns validation problem schema\", () => {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.errors).to.be.an('array').that.is.not.empty;\r",
+											"    jsonData.errors.forEach(error => {\r",
+											"        pm.expect(error).to.have.keys('tag', 'error', 'message');\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"// Check for specific validation errors\r",
+											"pm.test(\"Contains all expected validation errors\", () => {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    const errorTags = jsonData.errors.map(e => e.tag);\r",
+											"    \r",
+											"    // Page size validation\r",
+											"    pm.expect(errorTags).to.include('page-size');\r",
+											"    \r",
+											"    // Date format validation\r",
+											"    pm.expect(errorTags).to.include('start-date');\r",
+											"    \r",
+											"    // Transaction kind validation\r",
+											"    pm.expect(errorTags).to.include('kinds');\r",
+											"    \r",
+											"    // Sort field validation\r",
+											"    pm.expect(errorTags).to.include('sort-by');\r",
+											"    \r",
+											"    // Sort order validation\r",
+											"    pm.expect(errorTags).to.include('sort-order');\r",
+											"});\r",
+											"\r",
+											"// Verify no duplicates in errors\r",
+											"pm.test(\"No duplicate error messages\", () => {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    const uniqueErrors = [...new Set(jsonData.errors.map(e => e.tag))];\r",
+											"    pm.expect(jsonData.errors.length).to.equal(uniqueErrors.length);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/transactions?page-size=150&start-date=invalid-date&kinds=invalid-kind&sort-by=invalid-field&sort-order=invalid-order",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"transactions"
+									],
+									"query": [
+										{
+											"key": "page-size",
+											"value": "150"
+										},
+										{
+											"key": "start-date",
+											"value": "invalid-date"
+										},
+										{
+											"key": "kinds",
+											"value": "invalid-kind"
+										},
+										{
+											"key": "sort-by",
+											"value": "invalid-field"
+										},
+										{
+											"key": "sort-order",
+											"value": "invalid-order"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Validation Errors: Fine Errors",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 400 for edge case validation errors\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"//  Response structure check\r",
+											"pm.test(\"Returns validation problem structure\", function () {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.errors).to.be.an('array').that.is.not.empty;\r",
+											"    pm.expect(jsonData.errors[0]).to.include.keys('tag', 'error', 'message');\r",
+											"});\r",
+											"\r",
+											"//  Future date validation\r",
+											"pm.test(\"Detects future start date\", function () {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    const error = jsonData.errors.find(e => e.tag === 'start-date');\r",
+											"    pm.expect(error).to.exist;\r",
+											"});\r",
+											"\r",
+											"// Invalid date range\r",
+											"pm.test(\"Detects invalid date range (end before start)\", function () {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    const error = jsonData.errors.find(e => e.tag === 'end-date');\r",
+											"    pm.expect(error).to.exist;\r",
+											"});\r",
+											"\r",
+											"// Page size too large\r",
+											"pm.test(\"Detects page size > 100\", function () {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    const error = jsonData.errors.find(e => e.tag === 'page-size');\r",
+											"    pm.expect(error).to.exist;\r",
+											"    pm.expect(error.message).to.include('between 1 and 100');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/transactions?start-date=2099-01-01&end-date=2023-01-01&page-size=101",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"transactions"
+									],
+									"query": [
+										{
+											"key": "start-date",
+											"value": "2099-01-01"
+										},
+										{
+											"key": "end-date",
+											"value": "2023-01-01"
+										},
+										{
+											"key": "page-size",
+											"value": "101"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Categorize Transaction",
+					"item": [
+						{
+							"name": "Happy Path",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));\r",
+											"\r",
+											"\r",
+											"// Verify persistence (follow-up GET)\r",
+											"const newCategory = pm.collectionVariables.get(\"category_code\");\r",
+											"pm.sendRequest({\r",
+											"    url: `${pm.collectionVariables.get(\"base_url\")}/api/transactions?cat-code=${newCategory}`,\r",
+											"    method: \"GET\"\r",
+											"}, (_, res) => {\r",
+											"    pm.test(\"Transaction appears under new category\", () => {\r",
+											"        const transactionId = pm.collectionVariables.get(\"transaction_id\");\r",
+											"        const items = res.json().items || [];\r",
+											"        pm.expect(items.some(t => t.id === transactionId)).to.be.true;\r",
+											"    });\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"category-code\": \"{{category_code_2}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/transactions/{{transaction_id}}/categorize",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"{{transaction_id}}",
+										"categorize"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Validation Errors",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 400 on invalid input\", () => pm.response.to.have.status(400));\r",
+											"\r",
+											"// Verify error response structure\r",
+											"pm.test(\"Returns validation problem structure\", () => {\r",
+											"    pm.response.to.have.jsonSchema({\r",
+											"        type: \"object\",\r",
+											"        properties: {\r",
+											"            errors: {\r",
+											"                type: \"array\",\r",
+											"                items: {\r",
+											"                    type: \"object\",\r",
+											"                    properties: {\r",
+											"                        tag: { type: \"string\" },\r",
+											"                        error: { type: \"string\" },\r",
+											"                        message: { type: \"string\" }\r",
+											"                    },\r",
+											"                    required: [\"tag\", \"error\", \"message\"]\r",
+											"                }\r",
+											"            }\r",
+											"        },\r",
+											"        required: [\"errors\"]\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"// Check for specific validation errors\r",
+											"const responseData = pm.response.json();\r",
+											"const errors = responseData.errors;\r",
+											"\r",
+											"pm.test(\"Detects transaction id format error\", () =>\r",
+											"    pm.expect(errors.some(e => e.tag === \"transaction-id\")).to.be.true\r",
+											");\r",
+											"pm.test(\"Detects category code format error\", () =>\r",
+											"    pm.expect(errors.some(e => e.tag === \"category-code\")).to.be.true\r",
+											");\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"category-code\": \"INVALID_CATEGORY\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/transactions/invalid_id/categorize",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"invalid_id",
+										"categorize"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Business Rule: Category not found",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 440 on business rule violation\", () => pm.response.to.have.status(440));\r",
+											"\r",
+											"// Verify error response structure\r",
+											"pm.test(\"Return business problem schema\", () => {\r",
+											"    pm.response.to.have.jsonSchema({\r",
+											"        type: \"object\",\r",
+											"        properties: {\r",
+											"            problem: { type: \"string\" },\r",
+											"            message: { type: \"string\" }\r",
+											"        },\r",
+											"        required: [\"problem\", \"message\"]\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"// Verify error type\r",
+											"pm.test(\"Rejects non-existent category\", () => {\r",
+											"    pm.expect(pm.response.json().problem).to.eql(\"category-not-found\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"category-code\": \"INVALID\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/transactions/{{transaction_id}}/categorize",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"{{transaction_id}}",
+										"categorize"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Split Transaction",
+					"item": [
+						{
+							"name": "Happy Path",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const amount = Number(pm.collectionVariables.get(\"transaction_amount\"));\r",
+											"const half_amount = amount / 2; \r",
+											"pm.variables.set(\"half_amount\", half_amount);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Fixed variable access for base_url and transaction_id\r",
+											"pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));\r",
+											"\r",
+											"// Indirect verification via GET /transactions\r",
+											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
+											"const transactionId = pm.collectionVariables.get(\"transaction_id\");\r",
+											"const halfAmount = Number(pm.variables.get(\"half_amount\"));\r",
+											"const catCode1 = pm.collectionVariables.get(\"category_code\");\r",
+											"const catCode2 = pm.collectionVariables.get(\"category_code_2\");\r",
+											"\r",
+											"pm.sendRequest({\r",
+											"    url: `${baseUrl}/api/transactions?page=1&page-size=10`,\r",
+											"    method: \"GET\"\r",
+											"}, (err, res) => {\r",
+											"    pm.test(\"200 OK on GET /transactions\", () => {\r",
+											"        pm.expect(res).to.have.status(200);\r",
+											"    });\r",
+											"\r",
+											"    const json = res.json();\r",
+											"    const match = json.items.find(t => t.id === transactionId);\r",
+											"\r",
+											"    pm.test(\"Found our transaction\", () => {\r",
+											"        pm.expect(match).to.exist;\r",
+											"    });\r",
+											"\r",
+											"    pm.test(\"Splits are persisted correctly\", () => {\r",
+											"        const splits = match.splits;\r",
+											"        pm.expect(splits).to.deep.include.members([\r",
+											"            { \"cat-code\": catCode1, amount: halfAmount },\r",
+											"            { \"cat-code\": catCode2, amount: halfAmount }\r",
+											"        ]);\r",
+											"    });\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\r\n  {\"cat-code\": \"{{category_code}}\", \"amount\": {{half_amount}}},\r\n  {\"cat-code\": \"{{category_code_2}}\", \"amount\": {{half_amount}}}\r\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/transactions/{{transaction_id}}/split",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"{{transaction_id}}",
+										"split"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Validation Errors",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 400 on invalid input\", () => pm.response.to.have.status(400));\r",
+											"\r",
+											"// Verify error response structure\r",
+											"pm.test(\"Returns validation problem schema\", () => {\r",
+											"    pm.response.to.have.jsonSchema({\r",
+											"        type: \"object\",\r",
+											"        properties: {\r",
+											"            errors: {\r",
+											"                type: \"array\",\r",
+											"                items: {\r",
+											"                    type: \"object\",\r",
+											"                    properties: {\r",
+											"                        tag: { type: \"string\" },\r",
+											"                        error: { type: \"string\" },\r",
+											"                        message: { type: \"string\" }\r",
+											"                    },\r",
+											"                    required: [\"tag\", \"error\", \"message\"]\r",
+											"                }\r",
+											"            }\r",
+											"        },\r",
+											"        required: [\"errors\"]\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"// Check for specific validation errors\r",
+											"const errors = pm.response.json().errors;\r",
+											"\r",
+											"pm.test(\"Transaction ID error exists\", () => \r",
+											"    pm.expect(errors.some(e => e.tag.includes(\"transaction-id\"))).to.be.true\r",
+											");\r",
+											"\r",
+											"pm.test(\"Splits number error exists\", () => \r",
+											"    pm.expect(errors.some(e => e.tag.includes(\"splits\"))).to.be.true\r",
+											");\r",
+											"\r",
+											"pm.test(\"Split category code errors exist\", () => \r",
+											"    pm.expect(errors.some(e => e.tag.includes(\"cat-code\"))).to.be.true\r",
+											");\r",
+											"\r",
+											"pm.test(\"Split amount errors exist\", () => \r",
+											"    pm.expect(errors.some(e => e.tag.includes(\"amount\"))).to.be.true\r",
+											");"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\r\n  {\"cat-code\": \"INVALID_CATEGORY\", \"amount\": -10}\r\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/transactions/invalid_id/split",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"invalid_id",
+										"split"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Business Rule: Split Amount Mismatch",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 440 on business rule violation\", () => pm.response.to.have.status(440));\r",
+											"\r",
+											"// Verify business error schema\r",
+											"pm.test(\"Returns business problem schema\", () => {\r",
+											"    pm.response.to.have.jsonSchema({\r",
+											"        type: \"object\",\r",
+											"        properties: {\r",
+											"            problem: { type: \"string\" },\r",
+											"            message: { type: \"string\" }\r",
+											"        },\r",
+											"        required: [\"problem\", \"message\"]\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"// Check error type\r",
+											"pm.test(\"Rejects split amount mismatch\", () => {\r",
+											"    pm.expect(pm.response.json().problem).to.eql(\"split-amount-mismatch\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\r\n  { \"cat-code\": \"{{category_code}}\", \"amount\": 100 },\r\n  { \"cat-code\": \"{{category_code_2}}\", \"amount\": 100 }\r\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/transactions/{{transaction_id}}/split",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"{{transaction_id}}",
+										"split"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Business Rule: Non-Existent Category",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 440 on business rule violation\", () => pm.response.to.have.status(440));\r",
+											"\r",
+											"// Verify business problem schema \r",
+											"pm.test(\"Returns business problem schema\", () => {\r",
+											"    pm.response.to.have.jsonSchema({\r",
+											"        type: \"object\",\r",
+											"        properties: {\r",
+											"            problem: { type: \"string\" },\r",
+											"            message: { type: \"string\" }\r",
+											"        },\r",
+											"        required: [\"problem\", \"message\"]\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"// Check error type\r",
+											"pm.test(\"Rejects non-existent category\", () => {\r",
+											"    pm.expect(pm.response.json().problem).to.eql(\"category-not-found\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\r\n  {\"cat-code\": \"NOEXIST\", \"amount\": 30}, \r\n  {\"cat-code\": \"G\", \"amount\": 20}\r\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/transactions/{{transaction_id}}/split",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"{{transaction_id}}",
+										"split"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Import Transactions",
+					"item": [
+						{
+							"name": "Happy Path",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));\r",
+											"\r",
+											"// Verify persistence via GET /transactions\r",
+											"pm.sendRequest({\r",
+											"    url: `${pm.collectionVariables.get(\"base_url\")}/api/transactions`,\r",
+											"    method: \"GET\"\r",
+											"}, (_, res) => {\r",
+											"    pm.test(\"Imported transactions exist\", () => {\r",
+											"        const ids = res.json().items.map(t => t.id);\r",
+											"        pm.expect(ids).to.include(\"1\").and.to.include(\"2\");\r",
+											"    });\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "text/csv",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{valid_transactions_csv}}",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/transactions/import",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"import"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Validation Errors: Empty CSV",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 400 on empty CSV\", () => pm.response.to.have.status(400));\r",
+											"\r",
+											"// Verify error response structure\r",
+											"pm.test(\"Returns validation problem schema\", () => {\r",
+											"    pm.response.to.have.jsonSchema({\r",
+											"        type: \"object\",\r",
+											"        properties: {\r",
+											"            errors: {\r",
+											"                type: \"array\",\r",
+											"                items: {\r",
+											"                    type: \"object\",\r",
+											"                    properties: {\r",
+											"                        tag: { type: \"string\" },\r",
+											"                        error: { type: \"string\" },\r",
+											"                        message: { type: \"string\" }\r",
+											"                    },\r",
+											"                    required: [\"tag\", \"error\", \"message\"]\r",
+											"                }\r",
+											"            }\r",
+											"        },\r",
+											"        required: [\"errors\"]\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"// Check for specific validation errors\r",
+											"pm.test(\"Detects CSV parsing error\", () => {\r",
+											"    pm.expect(pm.response.json().errors[0].tag).to.equal(\"csv\");\r",
+											"    pm.expect(pm.response.json().errors[0].error).to.equal(\"required\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "text/csv",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/transactions/import",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"import"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Validation Errors: Malformed CSV",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 400 on malformed CSV\", () => pm.response.to.have.status(400));\r",
+											"\r",
+											"// Verify error response structure\r",
+											"pm.test(\"Returns validation problem schema\", () => {\r",
+											"    pm.response.to.have.jsonSchema({\r",
+											"        type: \"object\",\r",
+											"        properties: {\r",
+											"            errors: {\r",
+											"                type: \"array\",\r",
+											"                items: {\r",
+											"                    type: \"object\",\r",
+											"                    properties: {\r",
+											"                        tag: { type: \"string\" },\r",
+											"                        error: { type: \"string\" },\r",
+											"                        message: { type: \"string\" }\r",
+											"                    },\r",
+											"                    required: [\"tag\", \"error\", \"message\"]\r",
+											"                }\r",
+											"            }\r",
+											"        },\r",
+											"        required: [\"errors\"]\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"// Check for specific validation errors\r",
+											"pm.test(\"Detects CSV parsing error\", () => {\r",
+											"    pm.expect(pm.response.json().errors[0].tag).to.equal(\"csv\");\r",
+											"    pm.expect(pm.response.json().errors[0].error).to.equal(\"invalid-csv\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "text/csv",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\"broken,csv,data\r\n1,2\"",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/transactions/import",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"import"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Validation Errors: Invalid Field Formatting",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 400 on invalid data\", () => pm.response.to.have.status(400));\r",
+											"\r",
+											"// Verify error response structure\r",
+											"pm.test(\"Returns validation problem schema\", () => {\r",
+											"    pm.response.to.have.jsonSchema({\r",
+											"        type: \"object\",\r",
+											"        properties: {\r",
+											"            errors: {\r",
+											"                type: \"array\",\r",
+											"                items: {\r",
+											"                    type: \"object\",\r",
+											"                    properties: {\r",
+											"                        tag: { type: \"string\" },\r",
+											"                        error: { type: \"string\" },\r",
+											"                        message: { type: \"string\" }\r",
+											"                    },\r",
+											"                    required: [\"tag\", \"error\", \"message\"]\r",
+											"                }\r",
+											"            }\r",
+											"        },\r",
+											"        required: [\"errors\"]\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"// Check for specific validation errors\r",
+											"pm.test(\"Flags invalid amount format\", () => {\r",
+											"    const errors = pm.response.json().errors;\r",
+											"    pm.expect(errors.some(e => e.error === \"invalid-amount-format\")).to.be.true;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Flags invalid mm fromat\", () => {\r",
+											"    pm.expect(pm.response.json().errors.some(e => e.error === \"invalid-mcc-format\")).to.be.true;\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "text/csv",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{invalid_transactions_csv}}",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/transactions/import",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"import"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Validation Errors: Fine Errors",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 400 on invalid data\", () => pm.response.to.have.status(400));\r",
+											"\r",
+											"// Verify error response structure\r",
+											"pm.test(\"Returns validation problem schema\", () => {\r",
+											"    pm.response.to.have.jsonSchema({\r",
+											"        type: \"object\",\r",
+											"        properties: {\r",
+											"            errors: {\r",
+											"                type: \"array\",\r",
+											"                items: {\r",
+											"                    type: \"object\",\r",
+											"                    properties: {\r",
+											"                        tag: { type: \"string\" },\r",
+											"                        error: { type: \"string\" },\r",
+											"                        message: { type: \"string\" }\r",
+											"                    },\r",
+											"                    required: [\"tag\", \"error\", \"message\"]\r",
+											"                }\r",
+											"            }\r",
+											"        },\r",
+											"        required: [\"errors\"]\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"// Check for specific validation errors\r",
+											"pm.test(\"Flags invalid id\", () => {\r",
+											"    const errors = pm.response.json().errors;\r",
+											"    pm.expect(errors.some(e => e.error === \"id-length\")).to.be.true;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Flags future date\", () => {\r",
+											"    pm.expect(pm.response.json().errors.some(e => e.error === \"future-date\")).to.be.true;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Flags invalid direction\", () => {\r",
+											"    pm.expect(pm.response.json().errors.some(e => e.error === \"invalid-direction\")).to.be.true;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Flags missing currency\", () => {\r",
+											"    pm.expect(pm.response.json().errors.some(e => e.error === \"currency-required\")).to.be.true;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Flags invalid mcc\", () => {\r",
+											"    pm.expect(pm.response.json().errors.some(e => e.error === \"invalid-mcc\")).to.be.true;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Flags invalid kind\", () => {\r",
+											"    pm.expect(pm.response.json().errors.some(e => e.error === \"invalid-kind\")).to.be.true;\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "text/csv",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{invalid_transactions_csv_fine}}",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/transactions/import",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"import"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Business Rule: Duplicate ID",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 440 on business rule violation\", () => pm.response.to.have.status(440));\r",
+											"\r",
+											"// Verify business error schema \r",
+											"pm.test(\"Returns business problem schema\", () => {\r",
+											"    pm.response.to.have.jsonSchema({\r",
+											"        type: \"object\",\r",
+											"        properties: {\r",
+											"            problem: { type: \"string\" },\r",
+											"            message: { type: \"string\" }\r",
+											"        },\r",
+											"        required: [\"problem\", \"message\"]\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"// Check error type\r",
+											"pm.test(\"Detects duplicate transaction IDs\", () => {\r",
+											"    pm.expect(pm.response.json().problem).to.eql(\"duplicate-transaction\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "text/csv",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{invalid_transactions_csv_duplicate}}",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/transactions/import",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"import"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Business Rule: Negative Amount",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 440 on business rule violation\", () => pm.response.to.have.status(440));\r",
+											"\r",
+											"// Verify business error schema \r",
+											"pm.test(\"Returns business problem schema\", () => {\r",
+											"    pm.response.to.have.jsonSchema({\r",
+											"        type: \"object\",\r",
+											"        properties: {\r",
+											"            problem: { type: \"string\" },\r",
+											"            message: { type: \"string\" }\r",
+											"        },\r",
+											"        required: [\"problem\", \"message\"]\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"// Check error type\r",
+											"pm.test(\"Detects negative amount\", () => {\r",
+											"    pm.expect(pm.response.json().problem).to.eql(\"invalid-amount\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "text/csv",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{invalid_transactions_csv_negative_amount}}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/transactions/import",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"import"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Categories",
+			"item": [
+				{
+					"name": "Import Categories",
+					"item": [
+						{
+							"name": "Happy Path",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status check\r",
+											"pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "text/csv",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{valid_categories_csv}}",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/categories/import",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"categories",
+										"import"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Validation Errors: Empty CSV",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 400 on empty CSV\", () => pm.response.to.have.status(400));\r",
+											"\r",
+											"// Verify error response structure\r",
+											"pm.test(\"Returns validation problem schema\", () => {\r",
+											"    pm.response.to.have.jsonSchema({\r",
+											"        type: \"object\",\r",
+											"        properties: {\r",
+											"            errors: {\r",
+											"                type: \"array\",\r",
+											"                items: {\r",
+											"                    type: \"object\",\r",
+											"                    properties: {\r",
+											"                        tag: { type: \"string\" },\r",
+											"                        error: { type: \"string\" },\r",
+											"                        message: { type: \"string\" }\r",
+											"                    },\r",
+											"                    required: [\"tag\", \"error\", \"message\"]\r",
+											"                }\r",
+											"            }\r",
+											"        },\r",
+											"        required: [\"errors\"]\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"// Check for specific validation errors\r",
+											"pm.test(\"Detects CSV parsing error\", () => {\r",
+											"    pm.expect(pm.response.json().errors[0].tag).to.equal(\"csv\");\r",
+											"    pm.expect(pm.response.json().errors[0].error).to.equal(\"required\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "text/csv",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/categories/import",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"categories",
+										"import"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Validation Errors: Malformed CSV",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 400 on malformed CSV\", () => pm.response.to.have.status(400));\r",
+											"\r",
+											"// Verify error response structure\r",
+											"pm.test(\"Returns validation problem schema\", () => {\r",
+											"    pm.response.to.have.jsonSchema({\r",
+											"        type: \"object\",\r",
+											"        properties: {\r",
+											"            errors: {\r",
+											"                type: \"array\",\r",
+											"                items: {\r",
+											"                    type: \"object\",\r",
+											"                    properties: {\r",
+											"                        tag: { type: \"string\" },\r",
+											"                        error: { type: \"string\" },\r",
+											"                        message: { type: \"string\" }\r",
+											"                    },\r",
+											"                    required: [\"tag\", \"error\", \"message\"]\r",
+											"                }\r",
+											"            }\r",
+											"        },\r",
+											"        required: [\"errors\"]\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"// Check for specific validation errors\r",
+											"pm.test(\"Detects CSV parsing error\", () => {\r",
+											"    pm.expect(pm.response.json().errors[0].tag).to.equal(\"csv\");\r",
+											"    pm.expect(pm.response.json().errors[0].error).to.equal(\"invalid-csv\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "text/csv",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\"broken,csv,data\r\n1,2\"",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/categories/import",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"categories",
+										"import"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Validation Errors: Invalid Field Formatting",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 400 on invalid data\", () => pm.response.to.have.status(400));\r",
+											"\r",
+											"// Verify error response structure\r",
+											"pm.test(\"Returns validation problem schema\", () => {\r",
+											"    pm.response.to.have.jsonSchema({\r",
+											"        type: \"object\",\r",
+											"        properties: {\r",
+											"            errors: {\r",
+											"                type: \"array\",\r",
+											"                items: {\r",
+											"                    type: \"object\",\r",
+											"                    properties: {\r",
+											"                        tag: { type: \"string\" },\r",
+											"                        error: { type: \"string\" },\r",
+											"                        message: { type: \"string\" }\r",
+											"                    },\r",
+											"                    required: [\"tag\", \"error\", \"message\"]\r",
+											"                }\r",
+											"            }\r",
+											"        },\r",
+											"        required: [\"errors\"]\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"// Check for specific validation errors\r",
+											"pm.test(\"Flags invalid code \", () => {\r",
+											"    const errors = pm.response.json().errors;\r",
+											"    pm.expect(errors.some(e => e.error === \"code-format\")).to.be.true;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Flags invalid parent code\", () => {\r",
+											"    pm.expect(pm.response.json().errors.some(e => e.error === \"parentcode-format\")).to.be.true;\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "text/csv",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{invalid_categories_csv}}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/categories/import",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"categories",
+										"import"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Business Rule:  Nonexistent Parent",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 440 on business rule violation\", () => pm.response.to.have.status(440));\r",
+											"\r",
+											"// Verify business error schema \r",
+											"pm.test(\"Returns business problem schema\", () => {\r",
+											"    pm.response.to.have.jsonSchema({\r",
+											"        type: \"object\",\r",
+											"        properties: {\r",
+											"            problem: { type: \"string\" },\r",
+											"            message: { type: \"string\" }\r",
+											"        },\r",
+											"        required: [\"problem\", \"message\"]\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"// Check error type\r",
+											"pm.test(\"Detects missing parent\", () => {\r",
+											"    pm.expect(pm.response.json().problem).to.eql(\"invalid-parent\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "text/csv",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{invalid_categories_csv_orphan}}",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/categories/import",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"categories",
+										"import"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Analytics",
+			"item": [
+				{
+					"name": "Get Spending Analytics",
+					"item": [
+						{
+							"name": "Happy Path",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 200\", function() {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"// Schema validation\r",
+											"pm.test(\"Returns validation problem schema\", () => {\r",
+											"    pm.response.to.have.jsonSchema({\r",
+											"        type: \"object\",\r",
+											"        properties: {\r",
+											"            groups: {\r",
+											"                type: \"array\",\r",
+											"                items: {\r",
+											"                    type: \"object\",\r",
+											"                    properties: {\r",
+											"                        \"cat-code\": { type: [\"string\", \"null\"] },\r",
+											"                        amount: { type: \"number\" },\r",
+											"                        count: { type: \"integer\" }\r",
+											"                    },\r",
+											"                    required: [\"amount\", \"count\"]\r",
+											"                }\r",
+											"            }\r",
+											"        },\r",
+											"        required: [\"groups\"]\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"// Verify response contains expected categories\r",
+											"pm.test(\"Only categories with transactions are shown\", () => {\r",
+											"    const responseData = pm.response.json();\r",
+											"    const shownCategories = responseData.groups.map(g => g[\"cat-code\"]);\r",
+											"\r",
+											"    // Includes parent with transactions\r",
+											"    pm.expect(shownCategories).to.include(pm.collectionVariables.get(\"parent_category\"));\r",
+											"\r",
+											"    // Excludes empty parents\r",
+											"    pm.expect(shownCategories).not.to.include(pm.collectionVariables.get(\"empty_parent\"));\r",
+											"\r",
+											"    // Includes uncategorized\r",
+											"    pm.expect(shownCategories).to.include(\"UNCATEGORIZED\");\r",
+											"});\r",
+											"\r",
+											"// Verify response contains aggregated results\r",
+											"pm.test(\"Child category transactions are aggregated under parent\", () => {\r",
+											"    const foodGroup = pm.response.json().groups.find(g => g[\"cat-code\"] === pm.collectionVariables.get(\"parent_category\"));\r",
+											"    pm.expect(foodGroup).to.not.be.undefined;\r",
+											"    pm.expect(foodGroup.amount).to.equal(80); // 50 (F) + 30 (G)\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/spending-analytics",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"spending-analytics"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Happy Path: Filters",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 200 on filtered by parent category\", () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"// Verify applied filters\r",
+											"pm.test(\"Only selected parent and child categories are shown\", () => {\r",
+											"    const responseData = pm.response.json();\r",
+											"    const shownCategories = responseData.groups.map(g => g[\"cat-code\"]);\r",
+											"\r",
+											"    // Includes parent and child\r",
+											"    pm.expect(shownCategories).to.include(pm.collectionVariables.get(\"parent_category\"));\r",
+											"    pm.expect(shownCategories).to.include(pm.collectionVariables.get(\"child_category\"));\r",
+											"\r",
+											"    // Excludes unrelated category\r",
+											"    pm.expect(shownCategories).not.to.include(pm.collectionVariables.get(\"empty_parent\"));\r",
+											"});\r",
+											"\r",
+											"// ─── Aggregation Check ─────────────────────────────────────────────────────────\r",
+											"pm.test(\"Correctly sums child category amounts\", () => {\r",
+											"    const foodGroup = pm.response.json().groups.find(g => g[\"cat-code\"] === pm.collectionVariables.get(\"parent_category\"));\r",
+											"    pm.expect(foodGroup).to.not.be.undefined;\r",
+											"    pm.expect(foodGroup.amount).to.equal(50); // Only direct F transactions\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/spending-analytics?start-date=2023-01-01&end-date=2023-12-31&direction=d&cat-code=F",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"spending-analytics"
+									],
+									"query": [
+										{
+											"key": "start-date",
+											"value": "2023-01-01"
+										},
+										{
+											"key": "end-date",
+											"value": "2023-12-31"
+										},
+										{
+											"key": "direction",
+											"value": "d"
+										},
+										{
+											"key": "cat-code",
+											"value": "F"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Validation Errors: Invalid Field Formatting",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status code check\r",
+											"pm.test(\"Status code is 400 on invalid data\", () => pm.response.to.have.status(400));\r",
+											"\r",
+											"// Verify error response structure\r",
+											"pm.test(\"Returns validation problem schema\", () => {\r",
+											"    pm.response.to.have.jsonSchema({\r",
+											"        type: \"object\",\r",
+											"        properties: {\r",
+											"            errors: {\r",
+											"                type: \"array\",\r",
+											"                items: {\r",
+											"                    type: \"object\",\r",
+											"                    properties: {\r",
+											"                        tag: { type: \"string\" },\r",
+											"                        error: { type: \"string\" },\r",
+											"                        message: { type: \"string\" }\r",
+											"                    },\r",
+											"                    required: [\"tag\", \"error\", \"message\"]\r",
+											"                }\r",
+											"            }\r",
+											"        },\r",
+											"        required: [\"errors\"]\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"// Check for specific validation errors\r",
+											"pm.test(\"Contains all expected validation errors\", () => {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    const errors = jsonData.errors;\r",
+											"    \r",
+											"    pm.expect(errors.some(e => e.tag === \"start-date\")).to.be.true;\r",
+											"    pm.expect(errors.some(e => e.tag === \"direction\")).to.be.true;\r",
+											"    pm.expect(errors.some(e => e.tag === \"cat-code\")).to.be.true;\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/spending-analytics?cat-code=!@&start-date=invalid&direction=!@",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"spending-analytics"
+									],
+									"query": [
+										{
+											"key": "cat-code",
+											"value": "!@"
+										},
+										{
+											"key": "start-date",
+											"value": "invalid"
+										},
+										{
+											"key": "direction",
+											"value": "!@"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Validation Errors: Fine Errors",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Status check\r",
+											"pm.test(\"Status code is 400 for invalid parameters\", () => {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"// Schema validation\r",
+											"pm.test(\"Returns validation problem schema\", () => {\r",
+											"    pm.response.to.have.jsonSchema({\r",
+											"        type: \"object\",\r",
+											"        properties: {\r",
+											"            errors: {\r",
+											"                type: \"array\",\r",
+											"                items: {\r",
+											"                    type: \"object\",\r",
+											"                    properties: {\r",
+											"                        tag: { type: \"string\" },\r",
+											"                        error: { type: \"string\" },\r",
+											"                        message: { type: \"string\" }\r",
+											"                    },\r",
+											"                    required: [\"tag\", \"error\", \"message\"]\r",
+											"                }\r",
+											"            }\r",
+											"        },\r",
+											"        required: [\"errors\"]\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"// Future date validation\r",
+											"pm.test(\"Flags future start date\", () => {\r",
+											"    const errors = pm.response.json().errors;\r",
+											"    pm.expect(errors.some(e => e.tag === \"start-date\" && e.error === \"future-date\")).to.be.true;\r",
+											"});\r",
+											"\r",
+											"// Date range validation\r",
+											"pm.test(\"Flags end date before start date\", () => {\r",
+											"    const errors = pm.response.json().errors;\r",
+											"    pm.expect(errors.some(e => e.tag === \"end-date\" && e.error === \"invalid-range\")).to.be.true;\r",
+											"});\r",
+											"\r",
+											"// Direction validation\r",
+											"pm.test(\"Flags invalid single-character direction\", () => {\r",
+											"    const errors = pm.response.json().errors;\r",
+											"    pm.expect(errors.some(e => e.tag === \"direction\" && e.error === \"invalid-direction\")).to.be.true;\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/spending-analytics?start-date=2030-01-01&end-date=2023-01-01&direction=x",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"spending-analytics"
+									],
+									"query": [
+										{
+											"key": "start-date",
+											"value": "2030-01-01"
+										},
+										{
+											"key": "end-date",
+											"value": "2023-01-01"
+										},
+										{
+											"key": "direction",
+											"value": "x"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "category_codes",
+			"value": "[\"F\",\"G\",\"T\",\"E\",\"U\"]",
+			"type": "string"
+		},
+		{
+			"key": "transaction_ids",
+			"value": "[\"1\",\"2\",\"3\"]",
+			"type": "string"
+		},
+		{
+			"key": "transaction_id",
+			"value": "3",
+			"type": "string"
+		},
+		{
+			"key": "transaction_amount",
+			"value": "2000",
+			"type": "string"
+		},
+		{
+			"key": "category_code",
+			"value": "X",
+			"type": "string"
+		},
+		{
+			"key": "category_code_2",
+			"value": "Y",
+			"type": "string"
+		},
+		{
+			"key": "parent_category",
+			"value": ""
+		},
+		{
+			"key": "child_category",
+			"value": ""
+		},
+		{
+			"key": "empty_parent",
+			"value": ""
+		},
+		{
+			"key": "valid_transactions_csv",
+			"value": "id,beneficiary-name,date,direction,amount,description,currency,mcc,kind\n11,Supermarket,2023-01-15T09:30:00,d,45.67,Grocery shopping,USD,5411,pmt\n12,Restaurant,2023-01-16T19:45:00,d,32.50,Dinner out,USD,5812,pmt",
+			"type": "string"
+		},
+		{
+			"key": "invalid_transactions_csv",
+			"value": "id,beneficiary-name,date,direction,amount,description,currency,mcc,kind\nINVALID_ID,,2030-01-01,m,/,XXX,,sd,jkkk",
+			"type": "string"
+		},
+		{
+			"key": "invalid_transactions_csv_fine",
+			"value": "id,beneficiary-name,date,direction,amount,description,currency,mcc,kind\nINVALID_ID,,2030-01-01,m,4,XXX,,4,jkkk",
+			"type": "string"
+		},
+		{
+			"key": "invalid_transactions_csv_duplicate",
+			"value": "id,beneficiary-name,date,direction,amount,description,currency,mcc,kind\n1,,2023-01-01,d,10,,USD,,pmt\n\n1,,2023-01-02,d,20,,USD,,pmt",
+			"type": "string"
+		},
+		{
+			"key": "invalid_transactions_csv_negative_amount",
+			"value": "id,beneficiary-name,date,direction,amount,description,currency,mcc,kind\n1,,2023-01-01,d,-10,,USD,,pmt",
+			"type": "string"
+		},
+		{
+			"key": "valid_categories_csv",
+			"value": "code,parent-code,name\nT,,Tools\nS,T,Screwdriver\nX,,Xylophone",
+			"type": "string"
+		},
+		{
+			"key": "invalid_categories_csv",
+			"value": "code,parent-code,name\nINVALID_CODE,INVALID_PARENT,Name",
+			"type": "string"
+		},
+		{
+			"key": "invalid_categories_csv_orphan",
+			"value": "code,parent-code,name\nCHILD,NOEXIST,Orphan Category",
+			"type": "string"
+		}
+	]
+}

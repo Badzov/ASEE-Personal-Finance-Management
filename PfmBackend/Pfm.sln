@@ -16,6 +16,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{8629E1
 		auto-categorization-rules.yml = auto-categorization-rules.yml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{43A9F327-B6A0-4FE5-9F9D-9ACE7D427C77}"
+	ProjectSection(SolutionItems) = preProject
+		Documents\api-test-report.html = Documents\api-test-report.html
+		Documents\categories.csv = Documents\categories.csv
+		Documents\pfm-api-oas3 spec.txt = Documents\pfm-api-oas3 spec.txt
+		Documents\pfm-api-tests.postman_collection.json = Documents\pfm-api-tests.postman_collection.json
+		Documents\transactions.csv = Documents\transactions.csv
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
