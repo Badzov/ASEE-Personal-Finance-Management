@@ -10,6 +10,7 @@ using Pfm.Api.Models.Problems;
 using Pfm.Application.UseCases.Transactions.Commands.SplitTransaction;
 using Pfm.Application.UseCases.Transactions.Commands.AutoCategorizeTransactions;
 using Pfm.Application.Interfaces;
+using Pfm.Application.UseCases.Shared;
 
 namespace Pfm.Api.Controllers
 {
@@ -59,6 +60,20 @@ namespace Pfm.Api.Controllers
         [ProducesResponseType(typeof(BusinessProblem), 440)]
         public async Task<IActionResult> ImportTransactions([FromBody] string csvContent)
         {
+            await _mediator.Send(new ImportTransactionsCommand(csvContent));
+            return Ok();
+        }
+
+        [HttpPost("import/file")]
+        [Consumes("multipart/form-data")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(ValidationProblem), 400)]
+        [ProducesResponseType(typeof(BusinessProblem), 440)]
+        public async Task<IActionResult> ImportTransactionsFromFile([FromForm] FileImportDto dto, [FromServices] IFileValidator validator)
+        {
+            validator.Validate(dto.File);
+            using var stream = new StreamReader(dto.File.OpenReadStream());
+            var csvContent = await stream.ReadToEndAsync();
             await _mediator.Send(new ImportTransactionsCommand(csvContent));
             return Ok();
         }

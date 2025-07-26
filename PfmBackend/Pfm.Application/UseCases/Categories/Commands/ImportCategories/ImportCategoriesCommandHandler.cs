@@ -71,15 +71,11 @@ namespace Pfm.Application.UseCases.Categories.Commands.ImportCategories
                     continue;
                 }
 
-                try
-                {
-                    var category = ProcessCategory(record, existingCategories);
-                    categoriesToProcess.Add(category);
-                }
-                catch (BusinessRuleException ex)
-                {
-                    validationErrors.Add(new ValidationError(record.Code, ex.ProblemCode, ex.Message));
-                }
+                
+                var category = ProcessCategory(record, existingCategories);
+                categoriesToProcess.Add(category);
+                
+               
             }
 
             // 4. Handle validation failures

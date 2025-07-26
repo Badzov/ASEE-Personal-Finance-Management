@@ -39,6 +39,8 @@ namespace Pfm.Infrastructure.DependancyInjection
 
             services.AddSingleton<IRulesToSqlTranslator, RulesToSqlTranslator>();
 
+            services.AddScoped<IFileValidator, FileValidator>();
+
             return services;
         }
         public static IServiceCollection AddDomainServices(this IServiceCollection services)

@@ -13,7 +13,7 @@ namespace Pfm.Application.UseCases.Transactions.Commands.SplitTransaction
         {
             RuleFor(x => x.TransactionId)
                 .NotEmpty().WithErrorCode("required").WithMessage("Transaction ID is required")
-                .MaximumLength(8).WithErrorCode("max-length").WithMessage("Transaction ID cannot exceed 36 characters")
+                .MaximumLength(8).WithErrorCode("max-length").WithMessage("Transaction ID cannot exceed 8 characters")
                 .Matches("^[a-zA-Z0-9-]+$").WithErrorCode("invalid-format").WithMessage("Transaction ID can only contain alphanumeric characters and hyphens");
 
             RuleFor(x => x.Splits)
