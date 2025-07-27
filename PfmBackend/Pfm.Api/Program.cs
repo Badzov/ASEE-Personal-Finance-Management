@@ -47,17 +47,11 @@ builder.Services
 
 var app = builder.Build();
 
-app.MapControllers();
-
-app.UseMiddleware<ProblemDetailsMiddleware>();
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+ app.UseSwagger();
+ app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
+app.MapControllers();
+app.UseMiddleware<ProblemDetailsMiddleware>();
 
 app.Run();
-

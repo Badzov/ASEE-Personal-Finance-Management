@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Pfm.Application.Interfaces;
 using Pfm.Domain.Services;
 using Pfm.Infrastructure.Persistence.DbContexts;
+using Pfm.Infrastructure.Persistence.Initializer;
 using Pfm.Infrastructure.Persistence.Repositories;
 using Pfm.Infrastructure.Persistence.UnitOfWork;
 using Pfm.Infrastructure.Services;
@@ -15,24 +16,43 @@ namespace Pfm.Infrastructure.DependancyInjection
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
+
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             IConfiguration configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
+                .AddJsonFile($"appsettings.{environment}.json", optional: true)
+                .AddEnvironmentVariables()
                 .Build();
 
-            services.AddDbContext<PfmDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("MSSQLPfmDatabase")));
+            services.AddDbContext<PfmDbContext>(options =>
+                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddHostedService<DbInitializer>();
+
+
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ITransactionsCsvParser, TransactionCsvParser>();
             services.AddScoped<ICategoriesCsvParser, CategoriesCsvParser>();
 
-            var rulesPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "auto-categorization-rules.yml");
-            if (!File.Exists(rulesPath)) {
-                throw new Exception($">>>>>>>>>>>>>>>>>> Critical configuration missing: {rulesPath}");
-            }
+           
+
             // Add YAML config for rules
+            var configPath = Path.Combine(Directory.GetCurrentDirectory(), "../auto-categorization-rules.yml");
+
+            // For Docker environment fallback
+            if (!File.Exists(configPath))
+            {
+                configPath = Path.Combine(AppContext.BaseDirectory, "auto-categorization-rules.yml");
+            }
+
+            if (!File.Exists(configPath))
+            {
+                throw new Exception($">>>>>>>>>>>>>>>>>> Critical configuration missing: {configPath}");
+            }
+
             var yamlConfig = new ConfigurationBuilder()
-                .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), ".."))
-                .AddYamlFile(Path.Combine("auto-categorization-rules.yml"), optional: false, reloadOnChange: false)
+                .AddYamlFile(configPath, optional: false, reloadOnChange: false)
                 .Build();
 
             services.AddSingleton<IRulesProvider>(new RulesProvider(yamlConfig));
@@ -54,6 +74,8 @@ namespace Pfm.Infrastructure.DependancyInjection
 
             return services;
         }
+
+        private static bool IsRunningInDocker() => Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
     }
 }
 

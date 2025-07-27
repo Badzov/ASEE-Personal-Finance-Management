@@ -20,9 +20,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{
 	ProjectSection(SolutionItems) = preProject
 		Documents\api-test-report.html = Documents\api-test-report.html
 		Documents\categories.csv = Documents\categories.csv
+		Documents\newman script.txt = Documents\newman script.txt
+		Documents\pfm api oas3 spec.txt = Documents\pfm api oas3 spec.txt
 		Documents\pfm-api-oas3 spec.txt = Documents\pfm-api-oas3 spec.txt
 		Documents\pfm-api-tests.postman_collection.json = Documents\pfm-api-tests.postman_collection.json
 		Documents\transactions.csv = Documents\transactions.csv
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{83FF7ECD-E47A-47AD-A1B6-30BB76710BC4}"
+	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		docker-compose.yml = docker-compose.yml
+		Dockerfile = Dockerfile
 	EndProjectSection
 EndProject
 Global

@@ -23,11 +23,11 @@
 									"\r",
 									"\r",
 									"// Store categories for later use\r",
-									"const categories = [\"F\", \"G\", \"T\", \"E\", \"U\", \"X\", \"Y\"];\r",
+									"const categories = [\"T1\", \"T2\", \"T3\", \"T4\", \"T5\", \"T6\", \"T7\"];\r",
 									"pm.collectionVariables.set(\"category_codes\", categories);\r",
-									"pm.collectionVariables.set(\"parent_category\", \"F\");\r",
-									"pm.collectionVariables.set(\"child_category\", \"G\")\r",
-									"pm.collectionVariables.set(\"empty_parent\", \"T\");\r",
+									"pm.collectionVariables.set(\"parent_category\", \"T1\");\r",
+									"pm.collectionVariables.set(\"child_category\", \"T2\")\r",
+									"pm.collectionVariables.set(\"empty_parent\", \"T3\");\r",
 									"pm.collectionVariables.set(\"category_code\", categories[5]);\r",
 									"pm.collectionVariables.set(\"category_code_2\", categories[6]);"
 								],
@@ -47,7 +47,57 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "code,parent-code,name\r\nF,,Food\r\nG,F,Groceries\r\nT,,Transport\r\nE,,Entertainment\r\nU,,Utilities\r\nX,,/\r\nY,,/",
+							"raw": "code,parent-code,name\r\nT1,,Food\r\nT2,,Groceries\r\nT3,,Transport\r\nT4,,Entertainment\r\nT5,,Utilities\r\nT6,,/\r\nT7,,/",
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/categories/import",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"import"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set Parent-Child Relationship",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Status code check\r",
+									"pm.test(\"Status code is 200\", function() {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/csv",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "code,parent-code,name\r\nT2,T1,Groceries",
 							"options": {
 								"raw": {
 									"language": "text"
@@ -644,9 +694,9 @@
 											"\r",
 											"\r",
 											"// Verify persistence (follow-up GET)\r",
-											"const newCategory = pm.collectionVariables.get(\"category_code\");\r",
+											"const newCategory = pm.collectionVariables.get(\"category_code_2\");\r",
 											"pm.sendRequest({\r",
-											"    url: `${pm.collectionVariables.get(\"base_url\")}/api/transactions?cat-code=${newCategory}`,\r",
+											"    url: `${pm.collectionVariables.get(\"base_url\")}/api/transactions?start-date=2023-01-31&end-date=2023-01-31`,\r",
 											"    method: \"GET\"\r",
 											"}, (_, res) => {\r",
 											"    pm.test(\"Transaction appears under new category\", () => {\r",
@@ -876,7 +926,7 @@
 											"const catCode2 = pm.collectionVariables.get(\"category_code_2\");\r",
 											"\r",
 											"pm.sendRequest({\r",
-											"    url: `${baseUrl}/api/transactions?page=1&page-size=10`,\r",
+											"    url: `${baseUrl}/api/transactions?start-date=2023-01-31&end-date=2023-01-31`,\r",
 											"    method: \"GET\"\r",
 											"}, (err, res) => {\r",
 											"    pm.test(\"200 OK on GET /transactions\", () => {\r",
@@ -1174,12 +1224,12 @@
 											"\r",
 											"// Verify persistence via GET /transactions\r",
 											"pm.sendRequest({\r",
-											"    url: `${pm.collectionVariables.get(\"base_url\")}/api/transactions`,\r",
+											"    url: `${pm.collectionVariables.get(\"base_url\")}/api/transactions?start-date=2023-01-15T09:30:00&end-date=2023-01-15T09:30:00`,\r",
 											"    method: \"GET\"\r",
 											"}, (_, res) => {\r",
 											"    pm.test(\"Imported transactions exist\", () => {\r",
 											"        const ids = res.json().items.map(t => t.id);\r",
-											"        pm.expect(ids).to.include(\"1\").and.to.include(\"2\");\r",
+											"        pm.expect(ids).to.include(\"11\").and.to.include(\"12\");\r",
 											"    });\r",
 											"});"
 										],
@@ -2153,7 +2203,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{base_url}}/spending-analytics?start-date=2023-01-01&end-date=2023-12-31&direction=d&cat-code=F",
+									"raw": "{{base_url}}/spending-analytics?start-date=2023-01-01&end-date=2023-12-31&direction=d&cat-code=T1",
 									"host": [
 										"{{base_url}}"
 									],
@@ -2175,7 +2225,7 @@
 										},
 										{
 											"key": "cat-code",
-											"value": "F"
+											"value": "T1"
 										}
 									]
 								}
@@ -2379,12 +2429,12 @@
 		},
 		{
 			"key": "category_codes",
-			"value": "[\"F\",\"G\",\"T\",\"E\",\"U\"]",
+			"value": "T1,T2,T3,T4,T5,T6,T7",
 			"type": "string"
 		},
 		{
 			"key": "transaction_ids",
-			"value": "[\"1\",\"2\",\"3\"]",
+			"value": "1,2,3",
 			"type": "string"
 		},
 		{
@@ -2399,12 +2449,12 @@
 		},
 		{
 			"key": "category_code",
-			"value": "X",
+			"value": "T6",
 			"type": "string"
 		},
 		{
 			"key": "category_code_2",
-			"value": "Y",
+			"value": "T7",
 			"type": "string"
 		},
 		{
@@ -2421,7 +2471,7 @@
 		},
 		{
 			"key": "valid_transactions_csv",
-			"value": "id,beneficiary-name,date,direction,amount,description,currency,mcc,kind\n11,Supermarket,2023-01-15T09:30:00,d,45.67,Grocery shopping,USD,5411,pmt\n12,Restaurant,2023-01-16T19:45:00,d,32.50,Dinner out,USD,5812,pmt",
+			"value": "id,beneficiary-name,date,direction,amount,description,currency,mcc,kind\n11,Supermarket,2023-01-15T09:30:00,d,45.67,Grocery shopping,USD,5411,pmt\n12,Restaurant,2023-01-15T09:30:00,d,32.50,Dinner out,USD,5812,pmt",
 			"type": "string"
 		},
 		{
@@ -2436,7 +2486,7 @@
 		},
 		{
 			"key": "invalid_transactions_csv_duplicate",
-			"value": "id,beneficiary-name,date,direction,amount,description,currency,mcc,kind\n1,,2023-01-01,d,10,,USD,,pmt\n\n1,,2023-01-02,d,20,,USD,,pmt",
+			"value": "id,beneficiary-name,date,direction,amount,description,currency,mcc,kind\n1,,2023-01-01,d,10,,USD,,pmt\n1,,2023-01-02,d,20,,USD,,pmt",
 			"type": "string"
 		},
 		{
@@ -2446,7 +2496,7 @@
 		},
 		{
 			"key": "valid_categories_csv",
-			"value": "code,parent-code,name\nT,,Tools\nS,T,Screwdriver\nX,,Xylophone",
+			"value": "code,parent-code,name\nT3,,Tools\nT8,T3,Screwdriver\nT9,,Xylophone",
 			"type": "string"
 		},
 		{

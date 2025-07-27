@@ -90,14 +90,13 @@ namespace Pfm.Api.Middleware
             });
         }
 
-        private static (object Problem, int StatusCode) CreateDefaultProblem(
-            Exception exception)
+        private static (object Problem, int StatusCode) CreateDefaultProblem(Exception exception)
         {
             return (new DefaultProblem
             {
                 Title = "An unexpected error occurred",
                 Status = StatusCodes.Status500InternalServerError,
-                Details = "An internal server error has occurred"
+                Details = exception.Message
             }, StatusCodes.Status500InternalServerError);
         }
     }

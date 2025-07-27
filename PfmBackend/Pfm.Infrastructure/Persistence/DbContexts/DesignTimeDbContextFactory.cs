@@ -13,12 +13,18 @@ namespace Pfm.Infrastructure.Persistence.DbContexts
     {
         public PfmDbContext CreateDbContext(string[] args)
         {
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
             IConfiguration configuration = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json")
-            .Build();
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .AddJsonFile($"appsettings.{environment}.json", optional: true)
+                .AddEnvironmentVariables()
+                .Build();
 
             var optionsBuilder = new DbContextOptionsBuilder<PfmDbContext>();
-            optionsBuilder.UseSqlServer(configuration.GetConnectionString("MSSQLPfmDatabase"));
+
+            // Use the same connection string name everywhere
+            optionsBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
 
             return new PfmDbContext(optionsBuilder.Options);
         }

@@ -71,10 +71,7 @@ namespace Pfm.Application.UseCases.Transactions.Queries.GetTransactions
             }
             catch (Exception ex)
             {
-                throw new BusinessRuleException(
-                    "transaction-retrieval-failed",
-                    "Failed to retrieve transactions",
-                    ex.Message);
+                throw ex;
             }
         }
 

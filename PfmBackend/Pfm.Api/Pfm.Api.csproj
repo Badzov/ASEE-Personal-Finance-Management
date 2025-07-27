@@ -4,6 +4,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<IncludeOpenAPIAnalyzers>true</IncludeOpenAPIAnalyzers>
+	<CopySwaggerFilesToOutputDirectory>Always</CopySwaggerFilesToOutputDirectory>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,6 +17,10 @@
   <ItemGroup>
     <ProjectReference Include="..\Pfm.Application\Pfm.Application.csproj" />
     <ProjectReference Include="..\Pfm.Infrastructure\Pfm.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<Content Include="wwwroot\swagger\**" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
