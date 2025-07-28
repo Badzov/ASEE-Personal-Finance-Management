@@ -33,7 +33,7 @@ namespace Pfm.Application.UseCases.Categories.Commands.ImportCategories
 
         public async Task<Unit> Handle(ImportCategoriesCommand command, CancellationToken ct)
         {
-            // 0. Command validation
+            // Command validation
 
             var commandValidationResult = await _commandValidator.ValidateAsync(command, ct);
             if (!commandValidationResult.IsValid)
@@ -41,28 +41,23 @@ namespace Pfm.Application.UseCases.Categories.Commands.ImportCategories
                 throw new ValidationProblemException(commandValidationResult.Errors.Select(e =>
                     new ValidationError("csv", e.ErrorCode, e.ErrorMessage)).ToList());
             }
-
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(command.CsvContent));
 
-            // 1. Parse CSV with basic validation
+            // Parse CSV with basic validation
+
             var parseResult = await _parser.ParseAsync(stream);
+            if (parseResult.HasErrors) parseResult.ThrowIfErrors();
 
-            // Short-circuit if CSV parsing failed
-            if (parseResult.HasErrors)
-            {
-                _logger.LogWarning("CSV parsing failed with {ErrorCount} errors", parseResult.Errors.Count);
-                parseResult.ThrowIfErrors(); // Throws ValidationProblemException
-            }
+            // Get existing categories 
 
-            // 2. Get existing categories once
             var existingCategories = await _uow.Categories.GetAllAsync();
             var validationErrors = new List<ValidationError>();
-            var categoriesToProcess = new List<Category>();
+            var allCategoriesToProcess = new List<Category>();
 
-            // 3. Process each record with full validation
+            // First pass - Create all Categories without parent validation
+
             foreach (var record in parseResult.ValidRecords)
             {
-                // DTO validation
                 var dtoValidationResult = await _dtoValidator.ValidateAsync(record, ct);
                 if (!dtoValidationResult.IsValid)
                 {
@@ -71,29 +66,43 @@ namespace Pfm.Application.UseCases.Categories.Commands.ImportCategories
                     continue;
                 }
 
-                
-                var category = ProcessCategory(record, existingCategories);
-                categoriesToProcess.Add(category);
-                
-               
+                var category = ProcessCategoryFirstPass(record, existingCategories);
+                allCategoriesToProcess.Add(category);
             }
 
-            // 4. Handle validation failures
             if (validationErrors.Any())
             {
-                _logger.LogWarning("Domain validation failed with {ErrorCount} errors", validationErrors.Count);
                 throw new ValidationProblemException(validationErrors);
             }
 
-            // 5. Persist valid categories
-            await ProcessCategories(categoriesToProcess);
+            // Second pass - Validate parent relationships
+
+            foreach (var category in allCategoriesToProcess)
+            {
+                if (category.ParentCode != null)
+                {
+                    var parentExists = allCategoriesToProcess.Any(c => c.Code == category.ParentCode) ||
+                                     existingCategories.Any(c => c.Code == category.ParentCode);
+
+                    if (!parentExists)
+                    {
+                        throw new BusinessRuleException(
+                            "invalid-parent",
+                            $"Parent category '{category.ParentCode}' does not exist in file or database",
+                            $"For category: {category.Code}");
+                    }
+                }
+            }
+
+            // Process all categories
+            await ProcessCategories(allCategoriesToProcess);
             await _uow.CompleteAsync();
 
-            _logger.LogInformation("Successfully imported {Count} categories", categoriesToProcess.Count);
+            _logger.LogInformation("Successfully imported {Count} categories", allCategoriesToProcess.Count);
             return Unit.Value;
         }
 
-        private Category ProcessCategory(ImportCategoriesDto record, IEnumerable<Category> existingCategories)
+        private Category ProcessCategoryFirstPass(ImportCategoriesDto record, IEnumerable<Category> existingCategories)
         {
             var existing = existingCategories.FirstOrDefault(c => c.Code == record.Code);
 
@@ -104,44 +113,35 @@ namespace Pfm.Application.UseCases.Categories.Commands.ImportCategories
                 return existing;
             }
 
-            // Validate parent exists if specified
-            if (!string.IsNullOrEmpty(record.ParentCode) &&
-                !existingCategories.Any(c => c.Code == record.ParentCode))
-            {
-                throw new BusinessRuleException(
-                    "invalid-parent",
-                    $"Parent category '{record.ParentCode}' does not exist",
-                    $"Code: {record.Code}, Parent: {record.ParentCode}");
-            }
-
+            // Skip parent validation in first pass
             return new Category(record.Code, record.Name, record.ParentCode);
         }
 
         private async Task ProcessCategories(IEnumerable<Category> categories)
         {
+            var updates = new List<Category>();
+            var inserts = new List<Category>();
+
             foreach (var category in categories)
             {
-                if (category.ParentCode != null)
-                {
-                    // Ensure the parent exists (double-check)
-                    var parentExists = await _uow.Categories.ExistsAsync(category.ParentCode);
-                    if (!parentExists)
-                    {
-                        throw new BusinessRuleException(
-                            "invalid-parent",
-                            $"Parent category '{category.ParentCode}' not found",
-                            $"For category: {category.Code}");
-                    }
-                }
-
                 if (await _uow.Categories.ExistsAsync(category.Code))
                 {
-                    await _uow.Categories.UpdateAsync(category);
+                    updates.Add(category);
                 }
                 else
                 {
-                    await _uow.Categories.AddAsync(category);
+                    inserts.Add(category);
                 }
+            }
+
+            if (inserts.Any())
+            {
+                await _uow.Categories.AddRangeAsync(inserts);
+            }
+
+            foreach (var category in updates)
+            {
+                await _uow.Categories.UpdateAsync(category);
             }
         }
     }
