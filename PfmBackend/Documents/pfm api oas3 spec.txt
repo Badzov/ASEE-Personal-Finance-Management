@@ -1,0 +1,1183 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "PFM API",
+    "version": "v1"
+  },
+  "paths": {
+    "/spending-analytics": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "parameters": [
+          {
+            "name": "cat-code",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "start-date",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "end-date",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/spendings-by-category-dto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/spendings-by-category-dto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/spendings-by-category-dto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/validation-problem"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/validation-problem"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/validation-problem"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Default",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/default-problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/categories/import": {
+      "post": {
+        "tags": [
+          "Categories"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "File": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "File": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/validation-problem"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/validation-problem"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/validation-problem"
+                }
+              }
+            }
+          },
+          "440": {
+            "description": "Client Error",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/business-problem"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/business-problem"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/business-problem"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Default",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/default-problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/transactions": {
+      "get": {
+        "tags": [
+          "Transactions"
+        ],
+        "parameters": [
+          {
+            "name": "kinds",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "start-date",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "end-date",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "page-size",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          },
+          {
+            "name": "sort-by",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort-order",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "default": "asc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/transaction-dto-paged-list"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/transaction-dto-paged-list"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/transaction-dto-paged-list"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/validation-problem"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/validation-problem"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/validation-problem"
+                }
+              }
+            }
+          },
+          "440": {
+            "description": "Client Error",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/business-problem"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/business-problem"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/business-problem"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Default",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/default-problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/transactions/import": {
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "File": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "File": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/validation-problem"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/validation-problem"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/validation-problem"
+                }
+              }
+            }
+          },
+          "440": {
+            "description": "Client Error",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/business-problem"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/business-problem"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/business-problem"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Default",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/default-problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/transactions/{id}/categorize": {
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/categorize-transaction-dto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/validation-problem"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/validation-problem"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/validation-problem"
+                }
+              }
+            }
+          },
+          "440": {
+            "description": "Client Error",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/business-problem"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/business-problem"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/business-problem"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Default",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/default-problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/transactions/{id}/split": {
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/split-transaction-dto"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/validation-problem"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/validation-problem"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/validation-problem"
+                }
+              }
+            }
+          },
+          "440": {
+            "description": "Client Error",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/business-problem"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/business-problem"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/business-problem"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Default",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/default-problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/transactions/auto-categorize": {
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/validation-problem"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/validation-problem"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/validation-problem"
+                }
+              }
+            }
+          },
+          "440": {
+            "description": "Client Error",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/business-problem"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/business-problem"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/business-problem"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Default",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/default-problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/transactions/debug/rules": {
+      "get": {
+        "tags": [
+          "Transactions"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "default": {
+            "description": "Default",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/default-problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "business-problem": {
+        "type": "object",
+        "properties": {
+          "problem": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "categorize-transaction-dto": {
+        "type": "object",
+        "properties": {
+          "category-code": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "default-problem": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "details": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "directions-enum": {
+        "enum": [
+          "d",
+          "c"
+        ],
+        "type": "string"
+      },
+      "mcc-code-enum": {
+        "enum": [
+          4814,
+          4815,
+          4821,
+          4829,
+          4899,
+          4900,
+          5013,
+          5021,
+          5039,
+          5044,
+          5045,
+          5046,
+          5047,
+          5051,
+          5065,
+          5072,
+          5074,
+          5085,
+          5094,
+          5099,
+          5111,
+          5122,
+          5131,
+          5137,
+          5139,
+          5169,
+          5172,
+          5192,
+          5193,
+          5198,
+          5199,
+          5200,
+          5211,
+          5231,
+          5251,
+          5261,
+          5271,
+          5300,
+          5309,
+          5310,
+          5311,
+          5331,
+          5399,
+          5411,
+          5422,
+          5441,
+          5451,
+          5462,
+          5499,
+          5511,
+          5521,
+          5531,
+          5532,
+          5533,
+          5541,
+          5542,
+          5551,
+          5561,
+          5571,
+          5592,
+          5598,
+          5611,
+          5621,
+          5631,
+          5641,
+          5651,
+          5655,
+          5661,
+          5681,
+          5691,
+          5697,
+          5698,
+          5699,
+          5712,
+          5713,
+          5714,
+          5718,
+          5719,
+          5722,
+          5732,
+          5733,
+          5734,
+          5735,
+          5811,
+          5812,
+          5813,
+          5814,
+          5832,
+          5912,
+          5921,
+          5931,
+          5933,
+          5935,
+          5937,
+          5940,
+          5941,
+          5942,
+          5943,
+          5944,
+          5945,
+          5946,
+          5947,
+          5948,
+          5949,
+          5950,
+          5960,
+          5961,
+          5962,
+          5963,
+          5964,
+          5965,
+          5967,
+          5968,
+          5969,
+          5970,
+          5971,
+          5972,
+          5973,
+          5975,
+          5976,
+          5977,
+          5978,
+          5983,
+          5992,
+          5993,
+          5994,
+          5995,
+          5996,
+          5997,
+          5998,
+          5999,
+          6010,
+          6011,
+          6012,
+          6051,
+          6211,
+          6300,
+          6381,
+          6399,
+          7011,
+          7012,
+          7032,
+          7033,
+          7210,
+          7211,
+          7216,
+          7217,
+          7221,
+          7230,
+          7251,
+          7261,
+          7273,
+          7276,
+          7277,
+          7278,
+          7296,
+          7297,
+          7298,
+          7299,
+          7311,
+          7321,
+          7332,
+          7333,
+          7338,
+          7339,
+          7342,
+          7349,
+          7361,
+          7372,
+          7375,
+          7379,
+          7392,
+          7393,
+          7394,
+          7395,
+          7399,
+          7512,
+          7513,
+          7519,
+          7523,
+          7531,
+          7534,
+          7535,
+          7538,
+          7542,
+          7549,
+          7622,
+          7623,
+          7629,
+          7631,
+          7641,
+          7692,
+          7699,
+          7829,
+          7832,
+          7841,
+          7911,
+          7922,
+          7929,
+          7932,
+          7933,
+          7941,
+          7991,
+          7992,
+          7993,
+          7994,
+          7995,
+          7996,
+          7997,
+          7998,
+          7999,
+          8011,
+          8021,
+          8031,
+          8041,
+          8042,
+          8043,
+          8044,
+          8049,
+          8050,
+          8062,
+          8071,
+          8099,
+          8111,
+          8211,
+          8220,
+          8241,
+          8244,
+          8249,
+          8299,
+          8351,
+          8398,
+          8641,
+          8651,
+          8661,
+          8675,
+          8699,
+          8734,
+          8911,
+          8931,
+          8999,
+          9211,
+          9222,
+          9223,
+          9311,
+          9399,
+          9402,
+          9405,
+          9700,
+          9701,
+          9702,
+          9950
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "single-category-split-dto": {
+        "type": "object",
+        "properties": {
+          "cat-code": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "sort-order-enum": {
+        "enum": [
+          "asc",
+          "desc"
+        ],
+        "type": "string"
+      },
+      "spending-in-category-dto": {
+        "type": "object",
+        "properties": {
+          "cat-code": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "spendings-by-category-dto": {
+        "type": "object",
+        "properties": {
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/spending-in-category-dto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "split-transaction-dto": {
+        "type": "object",
+        "properties": {
+          "cat-code": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "transaction-dto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "beneficiary-name": {
+            "type": "string",
+            "nullable": true
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/directions-enum"
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "mcc": {
+            "$ref": "#/components/schemas/mcc-code-enum"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/transaction-kinds-enum"
+          },
+          "cat-code": {
+            "type": "string",
+            "nullable": true
+          },
+          "splits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/single-category-split-dto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "transaction-dto-paged-list": {
+        "type": "object",
+        "properties": {
+          "total-count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "page-size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total-pages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort-order": {
+            "$ref": "#/components/schemas/sort-order-enum"
+          },
+          "sort-by": {
+            "type": "string",
+            "nullable": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/transaction-dto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "transaction-kinds-enum": {
+        "enum": [
+          "dep",
+          "wdw",
+          "pmt",
+          "fee",
+          "inc",
+          "rev",
+          "adj",
+          "lnd",
+          "lnr",
+          "fcx",
+          "aop",
+          "acl",
+          "spl",
+          "sal"
+        ],
+        "type": "string"
+      },
+      "validation-error": {
+        "type": "object",
+        "properties": {
+          "tag": {
+            "type": "string",
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "validation-problem": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/validation-error"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

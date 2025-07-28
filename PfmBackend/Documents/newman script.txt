@@ -1,1 +1,0 @@
-newman run pfm-api-tests.postman_collection.json -r htmlextra --reporter-htmlextra-export ./api-test-report.html --reporter-htmlextra-title "API Test Report" --reporter-htmlextra-timezone "Europe/Belgrade" --reporter-htmlextra-logs --reporter-htmlextra-testPaging

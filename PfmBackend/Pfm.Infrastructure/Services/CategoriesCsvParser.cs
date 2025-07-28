@@ -46,6 +46,10 @@ namespace Pfm.Infrastructure.Services
             {
                 result.AddError("csv", "invalid-csv", "Invalid CSV format");
             }
+            catch (CsvHelperException ex)
+            {
+                result.AddError("csv", "invalid-csv", ex.Message);
+            }
             catch (Exception ex)
             {
                 result.AddError("csv", "processing-error", $"Error processing CSV: {ex.Message}");

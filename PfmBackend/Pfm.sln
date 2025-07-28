@@ -22,7 +22,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{
 		Documents\categories.csv = Documents\categories.csv
 		Documents\newman script.txt = Documents\newman script.txt
 		Documents\pfm api oas3 spec.txt = Documents\pfm api oas3 spec.txt
-		Documents\pfm-api-oas3 spec.txt = Documents\pfm-api-oas3 spec.txt
 		Documents\pfm-api-tests.postman_collection.json = Documents\pfm-api-tests.postman_collection.json
 		Documents\transactions.csv = Documents\transactions.csv
 		Documents\Transactions_LoadTest.jmx = Documents\Transactions_LoadTest.jmx

@@ -53,7 +53,7 @@ namespace Pfm.Api.Controllers
 
         }
 
-        [HttpPost("import")]
+        /*[HttpPost("import")]
         [Consumes("text/csv")]
         [ProducesResponseType(200)]
         [ProducesResponseType(typeof(ValidationProblem), 400)]
@@ -62,9 +62,9 @@ namespace Pfm.Api.Controllers
         {
             await _mediator.Send(new ImportTransactionsCommand(csvContent));
             return Ok();
-        }
+        }*/
 
-        [HttpPost("import/file")]
+        [HttpPost("import")]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(200)]
         [ProducesResponseType(typeof(ValidationProblem), 400)]
