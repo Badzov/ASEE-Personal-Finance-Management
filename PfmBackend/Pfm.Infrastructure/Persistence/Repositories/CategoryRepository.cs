@@ -16,5 +16,12 @@ namespace Pfm.Infrastructure.Persistence.Repositories
                 .Where(c => codes.Contains(c.Code))
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<Category>> GetByParentCodeAsync(string parentCode)
+        {
+            return await _context.Categories
+                .Where(c => c.ParentCode == parentCode)
+                .ToListAsync();
+        }
     }
 }

@@ -5,5 +5,7 @@ namespace Pfm.Application.Interfaces
     public interface ICategoryRepository : IRepository<Category>
     {
         Task<IEnumerable<Category>> GetByCodesAsync(IEnumerable<string> codes);
+
+        Task<IEnumerable<Category>> GetByParentCodeAsync(string parentCode);
     }
 }

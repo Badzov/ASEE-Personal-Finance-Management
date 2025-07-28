@@ -9,6 +9,8 @@ using Pfm.Application.UseCases.Queries;
 using Pfm.Application.UseCases.Transactions.Queries.GetTransactions;
 using Pfm.Application.UseCases.Transactions.Commands.SplitTransaction;
 using Pfm.Domain.Services;
+using Pfm.Application.UseCases.Categories.Commands.Mappings;
+using Pfm.Application.UseCases.Categories.Queries.GetTransactions;
 
 namespace Pfm.Application.DependancyInjection
 {
@@ -19,6 +21,7 @@ namespace Pfm.Application.DependancyInjection
             services.AddAutoMapper(config =>
             {
                 config.AddProfile<TransactionProfile>();
+                config.AddProfile<CategoryProfile>();
             });
 
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependancyInjection).Assembly));
@@ -31,7 +34,8 @@ namespace Pfm.Application.DependancyInjection
             services.AddScoped<IValidator<ImportTransactionsCommand>, ImportTransactionsCommandValidator>();
             services.AddScoped<IValidator<TransactionFilters>, TransactionFiltersValidator>();
             services.AddScoped<IValidator<SplitTransactionCommand>, SplitTransactionCommandValidator>();
-            
+            services.AddScoped<IValidator<GetCategoriesQuery>, GetCategoriesQueryValidator>();
+
             return services;
         }
     }
