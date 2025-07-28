@@ -74,8 +74,6 @@ namespace Pfm.Infrastructure.DependancyInjection
 
             return services;
         }
-
-        private static bool IsRunningInDocker() => Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
     }
 }
 

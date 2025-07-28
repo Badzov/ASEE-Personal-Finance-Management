@@ -1,0 +1,2 @@
+id,beneficiary-name,date,direction,amount,description,currency,mcc,kind
+file,Test Shop,2024-02-20T09:30:00,d,50,Test payment,USD,5411,pmt

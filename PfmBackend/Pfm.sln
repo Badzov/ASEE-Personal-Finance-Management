@@ -25,6 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{
 		Documents\pfm-api-oas3 spec.txt = Documents\pfm-api-oas3 spec.txt
 		Documents\pfm-api-tests.postman_collection.json = Documents\pfm-api-tests.postman_collection.json
 		Documents\transactions.csv = Documents\transactions.csv
+		Documents\Transactions_LoadTest.jmx = Documents\Transactions_LoadTest.jmx
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{83FF7ECD-E47A-47AD-A1B6-30BB76710BC4}"
