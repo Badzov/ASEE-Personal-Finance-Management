@@ -15,7 +15,7 @@ using Pfm.Application.UseCases.Shared;
 namespace Pfm.Api.Controllers
 {
     [ApiController]
-    [Route("api/transactions")]
+    [Route("transactions")]
     public class TransactionsController : ControllerBase
     {
         private readonly IMediator _mediator;

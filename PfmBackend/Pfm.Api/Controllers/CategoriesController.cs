@@ -12,7 +12,7 @@ using System.Text;
 namespace Pfm.Api.Controllers
 {
     [ApiController]
-    [Route("api/categories")]
+    [Route("categories")]
     public class CategoriesController : ControllerBase
     {
         private readonly IMediator _mediator;
