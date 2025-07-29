@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Pfm.Infrastructure.Migrations.SqlServer
 {
     /// <inheritdoc />
-    public partial class InitialSqlServer : Migration
+    public partial class MigrationName : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

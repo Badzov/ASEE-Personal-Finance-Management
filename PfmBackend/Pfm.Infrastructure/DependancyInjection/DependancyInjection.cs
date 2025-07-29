@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -20,24 +21,28 @@ namespace Pfm.Infrastructure.DependancyInjection
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
 
-            var dbSettings = new DatabaseSettings();
-            configuration.GetSection("Database").Bind(dbSettings);
+            var dbSettings = configuration.GetSection("Database").Get<DatabaseSettings>();
             services.AddSingleton(dbSettings);
 
-            services.AddDbContext<PfmDbContext>(options =>
+            if (dbSettings.Provider.Equals("PostgreSql", StringComparison.OrdinalIgnoreCase))
             {
-                if (dbSettings.Provider.Equals("PostgreSql", StringComparison.OrdinalIgnoreCase))
-                {
+                services.AddDbContext<PfmPostgreSqlDbContext>(options =>
                     options.UseNpgsql(dbSettings.ConnectionStrings["PostgreSql"],
-                        npgsql => npgsql.MigrationsAssembly("Pfm.Infrastructure"));
-                }
-                else
-                {
+                        o => o.MigrationsAssembly("Pfm.Infrastructure")
+                              .MigrationsHistoryTable("__EFMigrationsHistory_PostgreSql")));
+            }
+            else
+            {
+                services.AddDbContext<PfmSqlServerDbContext>(options =>
                     options.UseSqlServer(dbSettings.ConnectionStrings["SqlServer"],
-                        sql => sql.MigrationsAssembly("Pfm.Infrastructure"));
-                }
-            });
+                        o => o.MigrationsAssembly("Pfm.Infrastructure")
+                              .MigrationsHistoryTable("__EFMigrationsHistory_SqlServer")));
+            }
 
+            services.AddScoped<PfmDbContext>(provider =>
+                dbSettings.Provider.Equals("PostgreSql", StringComparison.OrdinalIgnoreCase)
+                    ? provider.GetRequiredService<PfmPostgreSqlDbContext>()
+                    : provider.GetRequiredService<PfmSqlServerDbContext>());
 
             services.AddHostedService<DbInitializer>();
 

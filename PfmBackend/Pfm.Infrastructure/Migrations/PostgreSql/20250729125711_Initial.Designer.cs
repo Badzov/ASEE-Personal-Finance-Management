@@ -11,9 +11,9 @@ using Pfm.Infrastructure.Persistence.DbContexts;
 
 namespace Pfm.Infrastructure.Migrations.PostgreSql
 {
-    [DbContext(typeof(PfmDbContext))]
-    [Migration("20250728234020_InitialCreate_PostgreSql")]
-    partial class InitialCreate_PostgreSql
+    [DbContext(typeof(PfmPostgreSqlDbContext))]
+    [Migration("20250729125711_MigrationName")]
+    partial class MigrationName
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
