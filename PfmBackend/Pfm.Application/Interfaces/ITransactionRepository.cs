@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using Pfm.Domain.Entities;
 using Pfm.Domain.Enums;
+using System.Data;
 
 namespace Pfm.Application.Interfaces
 {
@@ -27,6 +28,6 @@ namespace Pfm.Application.Interfaces
 
         Task<int> CountUncategorizedAsync(CancellationToken ct);
 
-        Task<int> ExecuteUpdateAsync(string sql, List<SqlParameter> parameters);
+        Task<int> ExecuteUpdateAsync(string sql, List<IDbDataParameter> parameters);
     }
 }

@@ -35,7 +35,7 @@ namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
         public async Task<Unit> Handle(ImportTransactionsCommand request, CancellationToken ct)
         {
 
-            // 1. Validate the command
+            // Validate the command
             var commandValidation = await _commandValidator.ValidateAsync(request, ct);
             if (!commandValidation.IsValid)
             {
@@ -45,7 +45,7 @@ namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
                 );
             }
 
-            // 2. Parse CSV with basic validation
+            // Parse CSV with basic validation
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(request.CsvContent));
             var parseResult = await _csvParser.ParseAsync(stream);
 
@@ -55,7 +55,7 @@ namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
                 parseResult.ThrowIfErrors();
             }
 
-            // 3. Process each record with full validation
+            // Process each record with full validation
             var validationErrors = new List<ValidationError>();
             var validTransactions = new List<Transaction>();
 
@@ -82,6 +82,13 @@ namespace Pfm.Application.UseCases.Transactions.Commands.ImportTransactions
                     }
 
                     var transaction = _mapper.Map<Transaction>(record);
+
+                    // Needed for PosgreSQL compatibility
+                    if (transaction.Date.Kind == DateTimeKind.Unspecified)
+                    {
+                        transaction.Date = DateTime.SpecifyKind(transaction.Date, DateTimeKind.Utc);
+                    }
+
                     transaction.Validate();
                     validTransactions.Add(transaction);
                 }

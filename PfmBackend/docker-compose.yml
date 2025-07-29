@@ -16,20 +16,39 @@ services:
       retries: 30
       start_period: 40s
 
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: pfm
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   pfm-api:
     build: .
     ports:
       - "8080:8080"
     volumes:
       - ./Pfm.Api:/app/swagger
+      - ./Pfm.Api/appsettings.Docker.json:/app/appsettings.json
     environment:
       - ASPNETCORE_ENVIRONMENT=Development 
       - ASPNETCORE_URLS=http://*:8080
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=pfm;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
     depends_on:
       sqlserver:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
     restart: unless-stopped
 
 volumes:
   sqlserver_data:
+  postgres_data: 

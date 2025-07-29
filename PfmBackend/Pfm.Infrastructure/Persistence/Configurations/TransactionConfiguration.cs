@@ -13,7 +13,7 @@ namespace Pfm.Infrastructure.Persistence.Configurations
             builder.Property(t => t.BeneficiaryName).HasMaxLength(50);
             builder.Property(t => t.Date).IsRequired();
             builder.Property(t => t.Direction).IsRequired();
-            builder.Property(t => t.Amount).HasColumnType("decimal(18,2)").IsRequired();
+            builder.Property(t => t.Amount).HasColumnType("numeric(18,2)").IsRequired();
             builder.Property(t => t.Description).HasMaxLength(100);
             builder.Property(t => t.Currency).HasMaxLength(3).IsRequired();
             builder.Property(t => t.CatCode).HasMaxLength(4);

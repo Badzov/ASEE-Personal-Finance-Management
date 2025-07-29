@@ -1,23 +1,27 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Pfm.Infrastructure.Migrations
+namespace Pfm.Infrastructure.Migrations.PostgreSql
 {
     /// <inheritdoc />
-    public partial class FixCascadeDelete : Migration
+    public partial class InitialCreate_PostgreSql : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:PostgresExtension:uuid-ossp", ",,");
+
             migrationBuilder.CreateTable(
                 name: "Categories",
                 columns: table => new
                 {
-                    Code = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ParentCode = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    Code = table.Column<string>(type: "character varying(4)", maxLength: 4, nullable: false),
+                    Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    ParentCode = table.Column<string>(type: "character varying(4)", maxLength: 4, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -34,16 +38,16 @@ namespace Pfm.Infrastructure.Migrations
                 name: "Transactions",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    BeneficiaryName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Direction = table.Column<int>(type: "int", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Currency = table.Column<string>(type: "nvarchar(3)", maxLength: 3, nullable: false),
-                    Mcc = table.Column<int>(type: "int", nullable: true),
-                    Kind = table.Column<int>(type: "int", nullable: false),
-                    CatCode = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    Id = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
+                    BeneficiaryName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Direction = table.Column<int>(type: "integer", nullable: false),
+                    Amount = table.Column<double>(type: "numeric(18,2)", nullable: false),
+                    Description = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    Currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    Mcc = table.Column<int>(type: "integer", nullable: true),
+                    Kind = table.Column<int>(type: "integer", nullable: false),
+                    CatCode = table.Column<string>(type: "character varying(4)", maxLength: 4, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -52,19 +56,18 @@ namespace Pfm.Infrastructure.Migrations
                         name: "FK_Transactions_Categories_CatCode",
                         column: x => x.CatCode,
                         principalTable: "Categories",
-                        principalColumn: "Code",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Code");
                 });
 
             migrationBuilder.CreateTable(
                 name: "Splits",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TransactionId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CatCode = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TransactionId = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
+                    CatCode = table.Column<string>(type: "character varying(4)", maxLength: 4, nullable: false),
+                    Amount = table.Column<double>(type: "numeric(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {

@@ -6,6 +6,8 @@ using Pfm.Infrastructure.Persistence.DbContexts;
 using Microsoft.Data.SqlClient;
 using Pfm.Domain.Exceptions;
 using Pfm.Infrastructure.Exceptions;
+using Npgsql;
+using System.Data;
 
 namespace Pfm.Infrastructure.Persistence.Repositories
 {
@@ -29,11 +31,21 @@ namespace Pfm.Infrastructure.Persistence.Repositories
 
             if (startDate.HasValue)
             {
+                //PostgreSQL
+                if (startDate?.Kind == DateTimeKind.Unspecified)
+                {
+                    startDate = DateTime.SpecifyKind(startDate.Value, DateTimeKind.Utc);
+                }
                 query = query.Where(t => t.Date >= startDate.Value);
             }
 
             if (endDate.HasValue)
             {
+                //PostgreSQL
+                if (endDate?.Kind == DateTimeKind.Unspecified)
+                {
+                    endDate = DateTime.SpecifyKind(startDate.Value, DateTimeKind.Utc);
+                }
                 query = query.Where(t => t.Date <= endDate.Value);
             }
 
@@ -90,11 +102,21 @@ namespace Pfm.Infrastructure.Persistence.Repositories
 
             if (startDate.HasValue)
             {
+                //PostgreSQL
+                if (startDate?.Kind == DateTimeKind.Unspecified)
+                {
+                    startDate = DateTime.SpecifyKind(startDate.Value, DateTimeKind.Utc);
+                }
                 query = query.Where(t => t.Date >= startDate.Value);
             }
 
             if (endDate.HasValue)
             {
+                //PostgreSQL
+                if (endDate?.Kind == DateTimeKind.Unspecified)
+                {
+                    endDate = DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc);
+                }
                 query = query.Where(t => t.Date <= endDate.Value);
             }
 
@@ -118,20 +140,10 @@ namespace Pfm.Infrastructure.Persistence.Repositories
                 .CountAsync(ct);
         }
 
-        public async Task<int> ExecuteUpdateAsync(string sql, List<SqlParameter> parameters)
+        public async Task<int> ExecuteUpdateAsync(string sql, List<IDbDataParameter> parameters)
         {
-            try
-            {
-                return await _context.Database.ExecuteSqlRawAsync(sql, parameters.ToArray());
-            }
-            catch (SqlException ex) when (ex.Number == 547) // FK violation
-            {
-                throw new BusinessRuleException("invalid-category", "Invalid category code specified in rules");
-            }
-            catch (Exception ex)
-            {
-                throw new PersistenceException("update-failed", ex.Message);
-            }
+            return await _context.Database.ExecuteSqlRawAsync(sql, parameters.ToArray());
         }
+
     }
 }

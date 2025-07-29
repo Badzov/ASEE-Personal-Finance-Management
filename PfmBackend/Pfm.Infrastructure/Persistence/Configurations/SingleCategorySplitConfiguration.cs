@@ -16,7 +16,7 @@ namespace Pfm.Infrastructure.Persistence.Configurations
             builder.HasKey(s => s.Id);
             builder.Property(s => s.TransactionId).HasMaxLength(8).IsRequired();
             builder.Property(s => s.CatCode).HasMaxLength(4).IsRequired();
-            builder.Property(s => s.Amount).HasColumnType("decimal(18,2)").IsRequired();
+            builder.Property(s => s.Amount).HasColumnType("numeric(18,2)").IsRequired();
 
             builder.HasOne(s => s.Transaction)
                 .WithMany(t => t.Splits)

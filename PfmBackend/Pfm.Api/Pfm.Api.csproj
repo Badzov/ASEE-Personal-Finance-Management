@@ -23,4 +23,12 @@
 	<Content Include="wwwroot\swagger\**" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Remove="appsettings.Docker.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="appsettings.Docker.json" />
+  </ItemGroup>
+
 </Project>

@@ -1,31 +1,43 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Pfm.Application.Interfaces;
 using Pfm.Domain.Services;
+using Pfm.Infrastructure.Persistence;
 using Pfm.Infrastructure.Persistence.DbContexts;
 using Pfm.Infrastructure.Persistence.Initializer;
 using Pfm.Infrastructure.Persistence.Repositories;
 using Pfm.Infrastructure.Persistence.UnitOfWork;
 using Pfm.Infrastructure.Services;
 using Pfm.Infrastructure.Services.RulesProvider;
+using System.Configuration;
 
 namespace Pfm.Infrastructure.DependancyInjection
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
 
-            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-            IConfiguration configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .AddJsonFile($"appsettings.{environment}.json", optional: true)
-                .AddEnvironmentVariables()
-                .Build();
+            var dbSettings = new DatabaseSettings();
+            configuration.GetSection("Database").Bind(dbSettings);
+            services.AddSingleton(dbSettings);
 
             services.AddDbContext<PfmDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            {
+                if (dbSettings.Provider.Equals("PostgreSql", StringComparison.OrdinalIgnoreCase))
+                {
+                    options.UseNpgsql(dbSettings.ConnectionStrings["PostgreSql"],
+                        npgsql => npgsql.MigrationsAssembly("Pfm.Infrastructure"));
+                }
+                else
+                {
+                    options.UseSqlServer(dbSettings.ConnectionStrings["SqlServer"],
+                        sql => sql.MigrationsAssembly("Pfm.Infrastructure"));
+                }
+            });
+
 
             services.AddHostedService<DbInitializer>();
 
@@ -57,7 +69,7 @@ namespace Pfm.Infrastructure.DependancyInjection
 
             services.AddSingleton<IRulesProvider>(new RulesProvider(yamlConfig));
 
-            services.AddSingleton<IRulesToSqlTranslator, RulesToSqlTranslator>();
+            services.AddSingleton<IRulesToSqlTranslator>(new RulesToSqlTranslator(dbSettings.Provider.Equals("PostgreSql", StringComparison.OrdinalIgnoreCase)));
 
             services.AddScoped<IFileValidator, FileValidator>();
 
