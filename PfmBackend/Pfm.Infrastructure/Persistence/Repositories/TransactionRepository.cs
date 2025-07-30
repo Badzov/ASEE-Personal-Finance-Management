@@ -44,7 +44,7 @@ namespace Pfm.Infrastructure.Persistence.Repositories
                 //PostgreSQL
                 if (endDate?.Kind == DateTimeKind.Unspecified)
                 {
-                    endDate = DateTime.SpecifyKind(startDate.Value, DateTimeKind.Utc);
+                    endDate = DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc);
                 }
                 query = query.Where(t => t.Date <= endDate.Value);
             }
